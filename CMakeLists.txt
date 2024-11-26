@@ -14,6 +14,7 @@ endif()
 
 find_package(OpenGL REQUIRED)
 find_package(GLUT REQUIRED)
+find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
 
@@ -25,6 +26,7 @@ target_include_directories(3DEngine PRIVATE ${OPENGL_INCLUDE_DIR})
 target_include_directories(3DEngine PRIVATE include/)
 
 target_link_libraries(3DEngine PRIVATE
+    GLEW::glew
     OpenGL::GL
     GLUT::GLUT
     glm::glm-header-only
