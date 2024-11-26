@@ -4,6 +4,7 @@
 #include <cstdlib>
 #include <iostream>
 #include <glm/glm.hpp>
+#include <util/Shader.hpp>
 
 Engine *Engine::instance = nullptr;
 
@@ -14,10 +15,13 @@ Engine::Engine() {
 }
 
 void Engine::display() {
-    glClear(GL_COLOR_BUFFER_BIT);
-    glClearColor(0.0, 0.0, 0.0, 1.0);
+    glClearColor(0.0, 0.0, 0.0, 1.0); // this SETS clear color
+    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
- 
+    // compile the triangle shader
+    glUseProgram(simpleShaderID);
+
+
     // 1st attribute buffer : vertices
     glEnableVertexAttribArray(0);
     glBindBuffer(GL_ARRAY_BUFFER, vertexbuffer);
@@ -29,10 +33,12 @@ void Engine::display() {
         0,                  // stride
         (void*)0            // array buffer offset
     );
+    
     // Draw the triangle !
     glDrawArrays(GL_TRIANGLES, 0, 3); // Starting from vertex 0; 3 vertices total -> 1 triangle
     glDisableVertexAttribArray(0);
     
+
     glutSwapBuffers();
 }
 
@@ -40,7 +46,6 @@ void Engine::onKeyboard(unsigned char key, int x, int y) {
     if (key == 27) {
         std::exit(0);
     }
-
     std::cout << "Pressed: " << key << ", pos: " << x << ", " << y << "\n";
 }
 
@@ -58,13 +63,14 @@ void Engine::initialize(int* argc, char* argv[]) {
     if (instance != nullptr) {
         throw std::exception("Already initialized.");
     }
-
+    instance = this;
 
     glutInit(argc, argv);
     glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
     glutInitWindowPosition(100, 100);
     glutInitWindowSize(800, 600);
     glutCreateWindow(name.c_str());
+    glewInit();
 
     // setup triangle buffer
     GLuint VertexArrayID;
@@ -83,7 +89,9 @@ void Engine::initialize(int* argc, char* argv[]) {
     glBufferData(GL_ARRAY_BUFFER, sizeof(triangle_buffer_data), triangle_buffer_data, GL_STATIC_DRAW);
     // end setup triangle buffer
 
+    simpleShaderID = util::loadShaders("shader/SimpleVertexShader.vert", "shader/SimpleFragmentShader.frag");
 
+    // bind events to instance using lambdas
     glutDisplayFunc([]() {instance->display(); });
     glutKeyboardFunc([](unsigned char key, int x, int y) {instance->onKeyboard(key, x, y); });
 

@@ -17,17 +17,19 @@ find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
+file(COPY src/shader DESTINATION ${CMAKE_BINARY_DIR}/Debug)
 
 add_executable(3DEngine 
   ${SOURCES}
+  ${INCLUDE}
 )
 
 target_include_directories(3DEngine PRIVATE ${OPENGL_INCLUDE_DIR})
 target_include_directories(3DEngine PRIVATE include/)
 
 target_link_libraries(3DEngine PRIVATE
-    GLEW::glew
     OpenGL::GL
+    GLEW::glew
     GLUT::GLUT
     glm::glm-header-only
 )

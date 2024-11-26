@@ -11,15 +11,14 @@ protected:
     std::string name;
  
 
-    GLuint vertexbuffer;
+    GLuint vertexbuffer = 0;
+    GLuint simpleShaderID = 0;
 
 public:
     virtual ~Engine();
     void initialize(int* argc, char *argv[]);
     Engine();
 
-
-    void setDisplayOptions();
 
 
     void display();
