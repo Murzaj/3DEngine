@@ -1,9 +1,9 @@
 #include "Engine.hpp"
 
-#include <GL/freeglut_std.h>
+#include <GL/freeglut.h>
+#include <GL/freeglut_ext.h>
 #include <GL/glew.h>
 #include <GL/glu.h>
-#include <GL/glut.h>
 #include <cstdio>
 #include <cstdlib>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -56,6 +56,7 @@ void Engine::testOpenGL2GlutPrimitiveDisplay() {
   glColor3f(1.0f, 0.0f, 0.0f);
   glPushMatrix();
   glTranslatef(-1.0f, 1.0f, 0.0f);
+  glRotatef(-angle, 0.0, 1.0, 0.0);
   glutSolidTeapot(0.5);
   glPopMatrix();
 
@@ -146,6 +147,9 @@ void Engine::initialize(int *argc, char *argv[]) {
   instance = this;
 
   glutInit(argc, argv);
+  glutInitContextVersion(3,3);
+  glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+  glutSetOption(GLUT_MULTISAMPLE, 4);
   glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
   glutInitWindowPosition(100, 100);
   glutInitWindowSize(800, 600);
