@@ -12,6 +12,7 @@ protected:
   static Engine *instance;
   std::string name;
 
+  float rotationV = 0.0f;
     
   // Initialize the camera and projection matrix
   glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f); // Camera position
@@ -36,6 +37,7 @@ public:
   Engine();
 
   void display();
+  void fixedUpdate();
   void onKeyboard(unsigned char key, int x, int y);
   void onSpecial(int key, int x, int y);
   void onSpecialUp(int key, int x, int y);

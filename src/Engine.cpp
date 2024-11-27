@@ -14,20 +14,26 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <util/Shader.hpp>
+#include <cmath>
 
 Engine *Engine::instance = nullptr;
 
 Engine::Engine() { name = "3D Engine"; }
+
+void Engine::fixedUpdate() {
+  angle += 1.0f;
+  if (angle >= 360.0f) {
+    angle -= 360.0f;
+  }
+  view = glm::rotate<float>(view, rotationV, glm::vec3(0.0, 1.0, 0.0));
+}
 
 void Engine::setupTimer() {
   // TODO: this is temporary
   glutTimerFunc(
       20,
       [](int x) {
-        instance->angle = instance->angle + 1.0f;
-        if (instance->angle >= 360.0f) {
-          instance->angle -= 360.0f;
-        }
+        instance->fixedUpdate();
         instance->setupTimer();
         glutPostRedisplay();
       },
@@ -83,23 +89,35 @@ void Engine::display() {
 }
 
 void Engine::onSpecial(int key, int x, int y) {
+  std::cout << "Pressed Special: " << key << ", pos: " << x << ", " << y << std::endl;
   switch (key) {
     case GLUT_KEY_LEFT:
-      view = glm::rotate<float>(view, 0.1, glm::vec3(0.0, 1.0, 0.0));
+      rotationV = -0.01;
       glutPostRedisplay();
       break;
-
     case GLUT_KEY_RIGHT:
-      view = glm::rotate<float>(view, -0.1, glm::vec3(0.0, 1.0, 0.0));
+      rotationV = +0.01;
       glutPostRedisplay();
       break;
   }
-  std::cout << "Pressed Special: " << key << ", pos: " << x << ", " << y << std::endl;
 }
 
 void Engine::onSpecialUp(int key, int x, int y) {
   std::cout << "Released Special: " << key << ", pos: " << x << ", " << y << std::endl;
-
+  switch (key) {
+    case GLUT_KEY_LEFT:
+      if(rotationV < 0.0) {
+        rotationV = 0.0;
+      }
+      glutPostRedisplay();
+      break;
+    case GLUT_KEY_RIGHT:
+      if(rotationV > 0.0) {
+        rotationV = 0.0;
+      }
+      glutPostRedisplay();
+      break;
+  }
 }
 
 void Engine::onKeyboard(unsigned char key, int x, int y) {
