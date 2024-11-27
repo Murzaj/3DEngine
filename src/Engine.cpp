@@ -89,7 +89,7 @@ void Engine::display() {
 }
 
 void Engine::onSpecial(int key, int x, int y) {
-  std::cout << "Pressed Special: " << key << ", pos: " << x << ", " << y << std::endl;
+  std::cout << "Pressed Special: " << key << std::endl;
   switch (key) {
     case GLUT_KEY_LEFT:
       rotationV = -0.01;
@@ -103,7 +103,7 @@ void Engine::onSpecial(int key, int x, int y) {
 }
 
 void Engine::onSpecialUp(int key, int x, int y) {
-  std::cout << "Released Special: " << key << ", pos: " << x << ", " << y << std::endl;
+  std::cout << "Released Special: " << key << std::endl;
   switch (key) {
     case GLUT_KEY_LEFT:
       if(rotationV < 0.0) {
@@ -124,11 +124,11 @@ void Engine::onKeyboard(unsigned char key, int x, int y) {
   if (key == 27) {
     std::exit(0);
   }
-  std::cout << "Pressed: " << key << ", pos: " << x << ", " << y << std::endl;
+  std::cout << "Pressed: " << key << std::endl;
 }
 
 void Engine::onKeyboardUp(unsigned char key, int x, int y) {
-  std::cout << "Released: " << key << ", pos: " << x << ", " << y << std::endl;
+  std::cout << "Released: " << key << std::endl;
 }
 
 Engine::~Engine() { instance = nullptr; }
