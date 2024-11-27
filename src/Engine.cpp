@@ -7,6 +7,7 @@
 #include <cstdio>
 #include <cstdlib>
 #include <glm/glm.hpp>
+#include <glm/gtc/type_ptr.hpp>
 #include <iostream>
 #include <util/Shader.hpp>
 
@@ -33,10 +34,22 @@ void Engine::setupTimer() {
 void Engine::testOpenGL2GlutPrimitiveDisplay() {
   // REMOVE LATER
   glLoadIdentity(); // Reset transformations
+  /*
   // Set up the camera
   gluLookAt(0.0, 0.0, 5.0,  // Camera position
             0.0, 0.0, 0.0,  // Look-at point
             0.0, 1.0, 0.0); // Up vector
+  */
+
+   // Set up the projection matrix
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixf(glm::value_ptr(projection));
+
+  // Set up the view matrix (camera)
+  glMatrixMode(GL_MODELVIEW);
+  glLoadMatrixf(glm::value_ptr(view));
+
+
 
   // Draw a red solid teapot
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -88,9 +101,6 @@ void Engine::mainLoop() { glutMainLoop(); }
 void setupProjection() {
   glMatrixMode(GL_PROJECTION); // Switch to the Projection Matrix
   glLoadIdentity();            // Reset the Projection Matrix
-
-  // Set up a perspective projection
-  gluPerspective(45.0, 800.0 / 600.0, 1.0, 100.0);
 
   glMatrixMode(GL_MODELVIEW); // Switch back to the Modelview Matrix
 }
