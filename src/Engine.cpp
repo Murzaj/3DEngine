@@ -6,6 +6,10 @@
 #include <GL/glut.h>
 #include <cstdio>
 #include <cstdlib>
+#include <glm/ext/matrix_clip_space.hpp>
+#include <glm/ext/matrix_projection.hpp>
+#include <glm/ext/matrix_transform.hpp>
+#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <iostream>
@@ -21,10 +25,9 @@ void Engine::setupTimer() {
       20,
       [](int x) {
         instance->angle = instance->angle + 1.0f;
-        if(instance->angle >= 360.0f) {
+        if (instance->angle >= 360.0f) {
           instance->angle -= 360.0f;
         }
-        std::cout << "Angle: " << instance->angle << std::endl;
         instance->setupTimer();
         glutPostRedisplay();
       },
@@ -34,22 +37,14 @@ void Engine::setupTimer() {
 void Engine::testOpenGL2GlutPrimitiveDisplay() {
   // REMOVE LATER
   glLoadIdentity(); // Reset transformations
-  /*
-  // Set up the camera
-  gluLookAt(0.0, 0.0, 5.0,  // Camera position
-            0.0, 0.0, 0.0,  // Look-at point
-            0.0, 1.0, 0.0); // Up vector
-  */
 
-   // Set up the projection matrix
+  // Set up the projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixf(glm::value_ptr(projection));
 
   // Set up the view matrix (camera)
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
-
-
 
   // Draw a red solid teapot
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -87,22 +82,44 @@ void Engine::display() {
   glutSwapBuffers();
 }
 
+void Engine::onSpecial(int key, int x, int y) {
+  switch (key) {
+    case GLUT_KEY_LEFT:
+      view = glm::rotate<float>(view, 0.1, glm::vec3(0.0, 1.0, 0.0));
+      glutPostRedisplay();
+      break;
+
+    case GLUT_KEY_RIGHT:
+      view = glm::rotate<float>(view, -0.1, glm::vec3(0.0, 1.0, 0.0));
+      glutPostRedisplay();
+      break;
+  }
+  std::cout << "Pressed Special: " << key << ", pos: " << x << ", " << y << std::endl;
+}
+
+void Engine::onSpecialUp(int key, int x, int y) {
+  std::cout << "Released Special: " << key << ", pos: " << x << ", " << y << std::endl;
+
+}
+
 void Engine::onKeyboard(unsigned char key, int x, int y) {
   if (key == 27) {
     std::exit(0);
   }
-  std::cout << "Pressed: " << key << ", pos: " << x << ", " << y << "\n";
+  std::cout << "Pressed: " << key << ", pos: " << x << ", " << y << std::endl;
+}
+
+void Engine::onKeyboardUp(unsigned char key, int x, int y) {
+  std::cout << "Released: " << key << ", pos: " << x << ", " << y << std::endl;
 }
 
 Engine::~Engine() { instance = nullptr; }
 
 void Engine::mainLoop() { glutMainLoop(); }
 
-void setupProjection() {
-  glMatrixMode(GL_PROJECTION); // Switch to the Projection Matrix
-  glLoadIdentity();            // Reset the Projection Matrix
-
-  glMatrixMode(GL_MODELVIEW); // Switch back to the Modelview Matrix
+void Engine::onReshape(int width, int height) {
+  glViewport(0,0,width,height);
+  projection = glm::perspective(70.0f, width / (float)height, 0.1f, 1000.0f);
 }
 
 void Engine::initialize(int *argc, char *argv[]) {
@@ -119,20 +136,21 @@ void Engine::initialize(int *argc, char *argv[]) {
 
   glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
   glEnable(GL_DEPTH_TEST);
-  setupProjection();
 
-  // simpleShaderID = util::loadShaders("shader/SimpleVertexShader.vert",
-  // "shader/SimpleFragmentShader.frag");
-
-  // bind events to instance using lambdas
-
+  // temporary
   instance->setupTimer();
 
+  glutIgnoreKeyRepeat(true);
   glutDisplayFunc([]() { instance->display(); });
-
+  glutSpecialFunc(
+      [](int key, int x, int y) { instance->onSpecial(key, x, y); });
+  glutSpecialUpFunc(
+      [](int key, int x, int y) { instance->onSpecialUp(key, x, y); });
   glutKeyboardFunc(
       [](unsigned char key, int x, int y) { instance->onKeyboard(key, x, y); });
+  glutKeyboardUpFunc(
+      [](unsigned char key, int x, int y) { instance->onKeyboardUp(key, x, y); });
 
-  // glutReshapeFunc([](int x,int y){ return; });
+  glutReshapeFunc([](int w,int h){ instance->onReshape(w, h); });
   mainLoop();
 }
