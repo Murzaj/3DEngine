@@ -10,6 +10,11 @@
       }
     },
     {
+      "name": "make",
+      "generator": "Unix Makefiles",
+      "binaryDir": "${sourceDir}/build"
+    },
+    {
       "name": "vs2022",
       "generator": "Visual Studio 17 2022",
       "binaryDir": "${sourceDir}/build",
@@ -22,6 +27,10 @@
     {
       "name": "vs2022build",
       "configurePreset": "vs2022"
+    },
+    {
+      "name": "makebuild",
+      "configurePreset": "make"
     }
   ]
 }
