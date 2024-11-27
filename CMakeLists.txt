@@ -31,5 +31,6 @@ target_link_libraries(3DEngine PRIVATE
     OpenGL::GL
     GLEW::glew
     GLUT::GLUT
+    GLU
     glm::glm-header-only
 )
