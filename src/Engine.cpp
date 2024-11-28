@@ -1,6 +1,7 @@
 #include "Engine.hpp"
 
 #include <GL/freeglut.h>
+#include <GL/freeglut_std.h>
 #include <GL/glew.h>
 #include <GL/glu.h>
 #include <cmath>
@@ -112,6 +113,8 @@ void Engine::mainLoop() { glutMainLoop(); }
 void Engine::onReshape(int width, int height) {
   this->width = width;
   this->height = height;
+  projection =
+      glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
   glViewport(0, 0, width, height);
 }
 
@@ -157,7 +160,8 @@ void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
   fov -= direction * DEG_IN_RAD;
   std::cout << "New FOV: " << fov * (180 / 3.14) << std::endl;
 
-  projection = glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
+  projection =
+      glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
 }
 
 void Engine::initialize(int *argc, char *argv[]) {
@@ -171,6 +175,7 @@ void Engine::initialize(int *argc, char *argv[]) {
   glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
   glutSetOption(GLUT_MULTISAMPLE, 4);
   glutInitDisplayMode(displayMode);
+
   glutInitWindowSize(width, height);
   glutInitWindowPosition(100, 100);
   glutCreateWindow(name.c_str());
@@ -193,6 +198,7 @@ void Engine::initialize(int *argc, char *argv[]) {
   nearPlane = 0.1f;
   farPlane = 100.0f;
   view = glm::lookAt(cameraPos, cameraTarget, cameraUp); // Camera view matrix
+
   projection =
       glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
 
