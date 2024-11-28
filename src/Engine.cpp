@@ -41,7 +41,6 @@ void Engine::setupTimer() {
 }
 
 void Engine::testOpenGL2GlutPrimitiveDisplay() {
-  // REMOVE LATER
   glLoadIdentity(); // Reset transformations
 
   // Set up the projection matrix
@@ -51,6 +50,8 @@ void Engine::testOpenGL2GlutPrimitiveDisplay() {
   // Set up the view matrix (camera)
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
+
+
 
   // Draw a red solid teapot
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -85,6 +86,7 @@ void Engine::testOpenGL2GlutPrimitiveDisplay() {
 
 void Engine::display() {
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
   testOpenGL2GlutPrimitiveDisplay();
   glutSwapBuffers();
 }
@@ -137,8 +139,10 @@ Engine::~Engine() { instance = nullptr; }
 void Engine::mainLoop() { glutMainLoop(); }
 
 void Engine::onReshape(int width, int height) {
+  this->width = width;
+  this->height = height;
+  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
   glViewport(0,0,width,height);
-  projection = glm::perspective(70.0f, width / (float)height, 0.1f, 1000.0f);
 }
 
 void Engine::initialize(int *argc, char *argv[]) {
@@ -146,19 +150,33 @@ void Engine::initialize(int *argc, char *argv[]) {
   }
   instance = this;
 
+  width = 800;
+  height = 800;
+
   glutInit(argc, argv);
   glutInitContextVersion(3,3);
   glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
   glutSetOption(GLUT_MULTISAMPLE, 4);
-  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE);
+  glutInitDisplayMode(GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH);
   glutInitWindowPosition(100, 100);
-  glutInitWindowSize(800, 600);
+  glutInitWindowSize(width, height);
   glutCreateWindow(name.c_str());
   glewInit();
 
-  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
-  glEnable(GL_DEPTH_TEST);
 
+  glClearColor(0.0f, 0.0f, 0.0f, 1.0f);
+
+
+  // setup camera and projection
+  cameraPos = glm::vec3(0.0f, 0.0f, 5.0f); // Camera position
+  cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); // Look at the origin
+  cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Camera's up vector
+  fov = 1.0f;
+  nearPlane = 0.1f;
+  farPlane = 100.0f;
+  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
+  view = glm::lookAt(cameraPos, cameraTarget, cameraUp); // Camera view matrix
+  
   // temporary
   instance->setupTimer();
 

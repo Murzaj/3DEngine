@@ -15,14 +15,19 @@ protected:
   float rotationV = 0.0f;
     
   // Initialize the camera and projection matrix
-  glm::vec3 cameraPos = glm::vec3(0.0f, 0.0f, 5.0f); // Camera position
-  glm::vec3 cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); // Look at the origin
-  glm::vec3 cameraUp = glm::vec3(0.0f, 1.0f, 0.0f); // Camera's up vector
+  glm::vec3 cameraPos;
+  glm::vec3 cameraTarget;
+  glm::vec3 cameraUp;
+  glm::mat4 view;
 
-  glm::mat4 view = glm::lookAt(cameraPos, cameraTarget, cameraUp); // Camera view matrix
-  float left = -2.0f, right = 2.0f, bottom = -2.0f, top = 2.0f, nearPlane = 0.1f, farPlane = 100.0f;
-  //glm::mat4 projection = glm::ortho(left, right, bottom, top, nearPlane, farPlane); // Orthographic projection
-  glm::mat4 projection = glm::perspective(70.0f, 800.0f / 600.0f, 0.1f, 1000.0f);
+  float farPlane;
+  float nearPlane;
+  float fov;
+
+  int width;
+  int height;
+
+  glm::mat4 projection;
 
   GLuint vertexbuffer = 0;
   GLuint simpleShaderID = 0;
