@@ -13,6 +13,7 @@ protected:
   std::string name;
 
   float rotationV = 0.0f;
+  float zoomV = 0.0f;
     
   // Initialize the camera and projection matrix
   glm::vec3 cameraPos;
@@ -35,7 +36,6 @@ protected:
 
 
   void setupTimer();
-  void testOpenGL2GlutPrimitiveDisplay(); // REMOVE LATER
 public:
   virtual ~Engine();
   void initialize(int* argc, char *argv[]);

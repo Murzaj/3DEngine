@@ -26,6 +26,8 @@ void Engine::fixedUpdate() {
     angle -= 360.0f;
   }
   view = glm::rotate<float>(view, rotationV, glm::vec3(0.0, 1.0, 0.0));
+  fov += zoomV;
+  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
 }
 
 void Engine::setupTimer() {
@@ -40,18 +42,18 @@ void Engine::setupTimer() {
       1);
 }
 
-void Engine::testOpenGL2GlutPrimitiveDisplay() {
-  glLoadIdentity(); // Reset transformations
 
+void Engine::display() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+
+  glLoadIdentity(); // Reset transformations
   // Set up the projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixf(glm::value_ptr(projection));
-
   // Set up the view matrix (camera)
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
-
-
 
   // Draw a red solid teapot
   glColor3f(1.0f, 0.0f, 0.0f);
@@ -82,12 +84,6 @@ void Engine::testOpenGL2GlutPrimitiveDisplay() {
   glRotatef(angle, 0.0, 1.0, 0.0);
   glutWireCone(0.5, 1.0, 20, 20);
   glPopMatrix();
-}
-
-void Engine::display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-  testOpenGL2GlutPrimitiveDisplay();
   glutSwapBuffers();
 }
 
@@ -96,11 +92,15 @@ void Engine::onSpecial(int key, int x, int y) {
   switch (key) {
     case GLUT_KEY_LEFT:
       rotationV = -0.01;
-      glutPostRedisplay();
       break;
     case GLUT_KEY_RIGHT:
       rotationV = +0.01;
-      glutPostRedisplay();
+      break;
+    case GLUT_KEY_DOWN:
+      zoomV += 0.01;
+      break;
+    case GLUT_KEY_UP:
+      zoomV -= 0.01;
       break;
   }
 }
@@ -112,13 +112,21 @@ void Engine::onSpecialUp(int key, int x, int y) {
       if(rotationV < 0.0) {
         rotationV = 0.0;
       }
-      glutPostRedisplay();
       break;
     case GLUT_KEY_RIGHT:
       if(rotationV > 0.0) {
         rotationV = 0.0;
       }
-      glutPostRedisplay();
+      break;
+    case GLUT_KEY_UP:
+      if(zoomV < 0.0) {
+        zoomV = 0.0;
+      }
+      break;
+    case GLUT_KEY_DOWN:
+      if(zoomV > 0.0) {
+        zoomV = 0.0;
+      }
       break;
   }
 }
@@ -141,7 +149,6 @@ void Engine::mainLoop() { glutMainLoop(); }
 void Engine::onReshape(int width, int height) {
   this->width = width;
   this->height = height;
-  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
   glViewport(0,0,width,height);
 }
 
@@ -174,8 +181,9 @@ void Engine::initialize(int *argc, char *argv[]) {
   fov = 1.0f;
   nearPlane = 0.1f;
   farPlane = 100.0f;
-  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
   view = glm::lookAt(cameraPos, cameraTarget, cameraUp); // Camera view matrix
+  projection = glm::perspective(fov, (float)width/(float)height, nearPlane, farPlane);
+  
   
   // temporary
   instance->setupTimer();
