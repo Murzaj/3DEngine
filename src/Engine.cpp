@@ -135,7 +135,7 @@ void Engine::setClearColor(const glm::vec4 &clearColor) {
   glClearColor(clearColor[0], clearColor[1], clearColor[2], clearColor[3]);
 }
 
-void Engine::onPassiveMotion(int x, int y) {
+void Engine::onMotion(int x, int y) {
   if (warped) {
     warped = false;
     return;
@@ -217,8 +217,8 @@ void Engine::initialize(int *argc, char *argv[]) {
   });
   glutReshapeFunc([](int w, int h) { instance->onReshape(w, h); });
 
-  glutPassiveMotionFunc([](int x, int y) { instance->onPassiveMotion(x, y); });
-  glutMotionFunc([](int x, int y) { instance->onPassiveMotion(x, y); });
+  glutPassiveMotionFunc([](int x, int y) { instance->onMotion(x, y); });
+  glutMotionFunc([](int x, int y) { instance->onMotion(x, y); });
 
   glutMouseWheelFunc([](int wheel, int direction, int x, int y) {
     instance->onMouseWheel(wheel, direction, x, y);

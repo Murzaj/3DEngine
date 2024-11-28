@@ -46,7 +46,7 @@ protected:
   void onSpecialUp(int key, int x, int y);
   void onKeyboardUp(unsigned char key, int x, int y);
   void onReshape(int width, int height);
-  void onPassiveMotion(int x, int y);
+  void onMotion(int x, int y);
   void onMouseWheel(int wheel, int direction, int x, int y);
 public:
   Engine();
