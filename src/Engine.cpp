@@ -1,16 +1,11 @@
 #include "Engine.hpp"
 
 #include <GL/freeglut.h>
-#include <GL/freeglut_ext.h>
-#include <GL/freeglut_std.h>
 #include <GL/glew.h>
 #include <GL/glu.h>
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <glm/ext/matrix_clip_space.hpp>
-#include <glm/ext/matrix_projection.hpp>
-#include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
