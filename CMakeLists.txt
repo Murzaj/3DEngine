@@ -18,7 +18,7 @@ find_package(GLUT REQUIRED)
 find_package(GLEW REQUIRED)
 find_package(glm REQUIRED)
 
-file(COPY src/shader DESTINATION ${CMAKE_BINARY_DIR}/Debug)
+# file(COPY src/shader DESTINATION ${CMAKE_BINARY_DIR}/Debug)
 
 add_executable(3DEngine 
   ${SOURCES}
