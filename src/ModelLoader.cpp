@@ -75,9 +75,9 @@ Shape3D *modelloader::shapeFromOBJ(const std::string &filename) {
   }
 
   for (auto f : faces) {
-    outFaces.push_back(f[0].vertIdx);
-    outFaces.push_back(f[1].vertIdx);
-    outFaces.push_back(f[2].vertIdx);
+    outFaces.push_back(f[0].vertIdx-1);
+    outFaces.push_back(f[1].vertIdx-1);
+    outFaces.push_back(f[2].vertIdx-1);
   }
   std::cout << "Stats:\nV:"<<outVertices.size()<<"\nC:"<<outColors.size()<<"\nF:"<<outFaces.size()<<"\n";
   Shape3D *shape = new Shape3D(outVertices, outColors, outFaces);

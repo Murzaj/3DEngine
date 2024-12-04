@@ -23,6 +23,8 @@ protected:
   Cube cube;
 
   Shape3D *gem;
+  Shape3D *orb;
+  Shape3D *monkey;
 
   float farPlane;
   float nearPlane;

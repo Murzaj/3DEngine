@@ -16,6 +16,98 @@
 
 Engine *Engine::instance = nullptr;
 
+Engine::Engine() {
+  name = "3D Engine";
+  width = 800;
+  height = 600;
+  fixedUpdateMs = 20;
+  fullscreen = false;
+  displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
+  gem = modelloader::shapeFromOBJ("gem.obj");
+  orb = modelloader::shapeFromOBJ("orb.obj");
+  monkey = modelloader::shapeFromOBJ("Monkey.obj");
+}
+
+Engine::~Engine() { 
+  delete gem;
+  delete orb;
+  delete monkey;
+  instance = nullptr;
+}
+
+void Engine::display() {
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+  glEnable(GL_DEPTH_TEST);
+
+  glLoadIdentity(); // Reset transformations
+  // Set up the projection matrix
+  glMatrixMode(GL_PROJECTION);
+  glLoadMatrixf(glm::value_ptr(projection));
+  // Set up the view matrix (camera)
+  glMatrixMode(GL_MODELVIEW);
+  glLoadMatrixf(glm::value_ptr(view));
+
+  // Draw a red solid teapot
+  /*
+  glm::mat4 teapotTransform =
+      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
+  teapotTransform = glm::rotate(teapotTransform, glm::radians(-angle),
+                                glm::vec3(0.0f, 1.0f, 0.0f));
+  glColor3f(1.0f, 0.0f, 0.0f);
+  glLoadMatrixf(glm::value_ptr(teapotTransform));
+  glutSolidTeapot(0.5);
+  */
+
+
+  glm::mat4 monkeyT =
+      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
+  monkeyT = glm::rotate(monkeyT, glm::radians(-angle),
+                                glm::vec3(0.0f, 1.0f, 0.0f));
+  glLoadMatrixf(glm::value_ptr(monkeyT));
+  monkey->draw();
+
+
+  // Draw a green wireframe sphere
+  /*
+  glColor3f(0.0f, 1.0f, 0.0f);
+  glm::mat4 sphereTransform(view);
+  sphereTransform =
+      glm::translate(sphereTransform, glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(sphereTransform));
+  glutWireSphere(0.5, 20, 20);
+  */
+  glm::mat4 orbT(view);
+  orbT = glm::translate(orbT, glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(orbT));
+  orb->draw();
+
+
+
+  // glColor3f(1.0f, 1.0f, 1.0f);
+  glm::mat4 gemT(view);
+  // translate, then scale, then rotate!
+  gemT = glm::translate(gemT, glm::vec3(-1.0f, -1.0f, 0.0f));
+  gemT = glm::scale(gemT, glm::vec3(0.5f));
+  gemT = glm::rotate(gemT, glm::radians(-angle),
+                              glm::vec3(0.0f, 1.0f, 1.0f));
+  glLoadMatrixf(glm::value_ptr(gemT));
+  gem->draw();
+
+  // originally glutWireCone
+  glm::mat4 cubeT(view);
+  cubeT = glm::translate(cubeT, glm::vec3(1.0f, -1.0f, 0.0f));
+  cubeT =
+      glm::rotate(cubeT, glm::radians(angle), glm::vec3(0.0, 1.0, 0.0));
+  glColor3f(1.0f, 1.0f, 0.0f);
+  glLoadMatrixf(glm::value_ptr(cubeT));
+  //glutWireCone(0.5, 1.0, 20, 20);
+
+  glutSwapBuffers();
+}
+
+
+
+
 void Engine::fixedUpdate() {
   angle += 1.0f;
   if (angle >= 360.0f) {
@@ -35,55 +127,6 @@ void Engine::setupTimer() {
       1);
 }
 
-void Engine::display() {
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glEnable(GL_DEPTH_TEST);
-
-  glLoadIdentity(); // Reset transformations
-  // Set up the projection matrix
-  glMatrixMode(GL_PROJECTION);
-  glLoadMatrixf(glm::value_ptr(projection));
-  // Set up the view matrix (camera)
-  glMatrixMode(GL_MODELVIEW);
-  glLoadMatrixf(glm::value_ptr(view));
-
-  glm::mat4 teapotTransform =
-      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
-  teapotTransform = glm::rotate(teapotTransform, glm::radians(-angle),
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-  // Draw a red solid teapot
-  glColor3f(1.0f, 0.0f, 0.0f);
-  glLoadMatrixf(glm::value_ptr(teapotTransform));
-  glutSolidTeapot(0.5);
-
-  // Draw a green wireframe sphere
-  glColor3f(0.0f, 1.0f, 0.0f);
-  glm::mat4 sphereTransform(view);
-  sphereTransform =
-      glm::translate(sphereTransform, glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(sphereTransform));
-  glutWireSphere(0.5, 20, 20);
-
-  glColor3f(1.0f, 1.0f, 1.0f);
-  glm::mat4 cubeTransform(view);
-  // translate, then scale, then rotate!
-  cubeTransform = glm::translate(cubeTransform, glm::vec3(-1.0f, -1.0f, 0.0f));
-  cubeTransform = glm::scale(cubeTransform, glm::vec3(0.5f));
-  cubeTransform = glm::rotate(cubeTransform, glm::radians(-angle),
-                              glm::vec3(0.0f, 1.0f, 1.0f));
-  glLoadMatrixf(glm::value_ptr(cubeTransform));
-  gem->draw();
-
-  // Draw a yellow wireframe cone
-  glm::mat4 coneTransform(view);
-  coneTransform = glm::translate(coneTransform, glm::vec3(1.0f, -1.0f, 0.0f));
-  coneTransform =
-      glm::rotate(coneTransform, glm::radians(angle), glm::vec3(0.0, 1.0, 0.0));
-  glColor3f(1.0f, 1.0f, 0.0f);
-  glLoadMatrixf(glm::value_ptr(coneTransform));
-  glutWireCone(0.5, 1.0, 20, 20);
-  glutSwapBuffers();
-}
 
 void Engine::onSpecial(int key, int x, int y) {}
 
@@ -108,22 +151,6 @@ void Engine::onKeyboard(unsigned char key, int x, int y) {
 }
 
 void Engine::onKeyboardUp(unsigned char key, int x, int y) {}
-
-Engine::Engine() {
-  name = "3D Engine";
-  width = 800;
-  height = 600;
-  fixedUpdateMs = 20;
-  fullscreen = false;
-  displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
-  gem = modelloader::shapeFromOBJ("gem.obj");
-}
-
-Engine::~Engine() { 
-  delete gem;
-  instance = nullptr;
-}
-
 void Engine::mainLoop() { glutMainLoop(); }
 
 void Engine::onReshape(int width, int height) {
