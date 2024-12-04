@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "Cube.hpp"
 
 #include <GL/freeglut.h>
 #include <GL/freeglut_std.h>
@@ -7,10 +8,11 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
+#include <glm/ext/matrix_transform.hpp>
 #include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
-#include <iostream>
+#include <glm/trigonometric.hpp>
 
 Engine *Engine::instance = nullptr;
 
@@ -18,6 +20,7 @@ Engine::Engine() {
   name = "3D Engine";
   width = 800;
   height = 600;
+  fixedUpdateMs = 20;
   fullscreen = false;
   displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
 }
@@ -32,7 +35,7 @@ void Engine::fixedUpdate() {
 void Engine::setupTimer() {
   // TODO: this is temporary
   glutTimerFunc(
-      20,
+      fixedUpdateMs,
       [](int x) {
         instance->fixedUpdate();
         instance->setupTimer();
@@ -53,57 +56,67 @@ void Engine::display() {
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
 
+  glm::mat4 teapotTransform =
+      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
+  teapotTransform = glm::rotate(teapotTransform, glm::radians(-angle),
+                                glm::vec3(0.0f, 1.0f, 0.0f));
   // Draw a red solid teapot
   glColor3f(1.0f, 0.0f, 0.0f);
-  glPushMatrix();
-  glTranslatef(-1.0f, 1.0f, 0.0f);
-  glRotatef(-angle, 0.0, 1.0, 0.0);
+  glLoadMatrixf(glm::value_ptr(teapotTransform));
   glutSolidTeapot(0.5);
-  glPopMatrix();
 
   // Draw a green wireframe sphere
   glColor3f(0.0f, 1.0f, 0.0f);
-  glPushMatrix();
-  glTranslatef(1.0f, 1.0f, 0.0f);
+  glm::mat4 sphereTransform(view);
+  sphereTransform =
+      glm::translate(sphereTransform, glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(sphereTransform));
   glutWireSphere(0.5, 20, 20);
-  glPopMatrix();
 
-  // Draw a blue solid cube
-  glColor3f(0.0f, 0.0f, 1.0f);
-  glPushMatrix();
-  glTranslatef(-1.0f, -1.0f, 0.0f);
-  glutSolidCube(0.8);
-  glPopMatrix();
+  glColor3f(1.0f, 1.0f, 1.0f);
+  glm::mat4 cubeTransform(view);
+  // translate, then scale, then rotate!
+  cubeTransform = glm::translate(cubeTransform, glm::vec3(-1.0f, -1.0f, 0.0f));
+  cubeTransform = glm::scale(cubeTransform, glm::vec3(0.5f));
+  cubeTransform = glm::rotate(cubeTransform, glm::radians(-angle),
+                              glm::vec3(0.0f, 1.0f, 1.0f));
+  glLoadMatrixf(glm::value_ptr(cubeTransform));
+  cube.draw();
 
   // Draw a yellow wireframe cone
+  glm::mat4 coneTransform(view);
+  coneTransform = glm::translate(coneTransform, glm::vec3(1.0f, -1.0f, 0.0f));
+  coneTransform =
+      glm::rotate(coneTransform, glm::radians(angle), glm::vec3(0.0, 1.0, 0.0));
   glColor3f(1.0f, 1.0f, 0.0f);
-  glPushMatrix();
-  glTranslatef(1.0f, -1.0f, 0.0f);
-  glRotatef(angle, 0.0, 1.0, 0.0);
+  glLoadMatrixf(glm::value_ptr(coneTransform));
   glutWireCone(0.5, 1.0, 20, 20);
-  glPopMatrix();
   glutSwapBuffers();
 }
 
-void Engine::onSpecial(int key, int x, int y) {
-  std::cout << "Pressed Special: " << key << std::endl;
-}
+void Engine::onSpecial(int key, int x, int y) {}
 
-void Engine::onSpecialUp(int key, int x, int y) {
-  std::cout << "Released Special: " << key << std::endl;
-}
+void Engine::onSpecialUp(int key, int x, int y) {}
 
 void Engine::onKeyboard(unsigned char key, int x, int y) {
-  std::cout << "Pressed: " << key << std::endl;
   if (key == 27) {
-    std::cout << "Quitting..." << std::endl;
     std::exit(0);
+  }
+  if (key == 'a') {
+    sphereX += .2f;
+  }
+  if (key == 'd') {
+    sphereX -= .2f;
+  }
+  if (key == 'w') {
+    sphereY += .2f;
+  }
+  if (key == 's') {
+    sphereY -= .2f;
   }
 }
 
-void Engine::onKeyboardUp(unsigned char key, int x, int y) {
-  std::cout << "Released: " << key << std::endl;
-}
+void Engine::onKeyboardUp(unsigned char key, int x, int y) {}
 
 Engine::~Engine() { instance = nullptr; }
 
@@ -116,6 +129,8 @@ void Engine::onReshape(int width, int height) {
       glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
   glViewport(0, 0, width, height);
 }
+
+void Engine::setFixedUpdateFps(float fps) { fixedUpdateMs = 1000 / fps; }
 
 void Engine::setVideoMode(int width, int height, bool fullscreen,
                           bool zBuffer) {
@@ -140,7 +155,6 @@ void Engine::onMotion(int x, int y) {
   int halfw = width / 2;
   int halfh = height / 2;
 
-  std::cout << "PassiveMotion: " << x - halfw << ", " << y - halfh << std::endl;
   if (x != halfw || y != halfh) {
     glutWarpPointer(halfw, halfh);
     warped = true;
@@ -153,12 +167,8 @@ void Engine::onMotion(int x, int y) {
 }
 
 void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
-  std::cout << "Mouse wheel: " << wheel << ", " << direction << ", " << x
-            << ", " << y << std::endl;
   const float DEG_IN_RAD = 0.01745329;
   fov -= direction * DEG_IN_RAD;
-  std::cout << "New FOV: " << fov * (180 / 3.14) << std::endl;
-
   projection =
       glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
 }
@@ -186,20 +196,21 @@ void Engine::initialize(int *argc, char *argv[]) {
 
   glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 
-  // setup camera and projection
-  cameraPos = glm::vec3(0.0f, 0.0f, 5.0f);    // Camera position
-  cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f); // Look at the origin
-  cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);     // Camera's up vector
+  //
   //
   const float DEG_IN_RAD = 0.01745329;
   fov = 80 * DEG_IN_RAD;
 
   nearPlane = 0.1f;
   farPlane = 100.0f;
-  view = glm::lookAt(cameraPos, cameraTarget, cameraUp); // Camera view matrix
 
-  projection =
-      glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
+  cameraPos = glm::vec3(0.0f, 0.0f, 8.0f);
+  cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
+  cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
+
+  view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
+  projection = glm::perspective(fov, width / (float)height, nearPlane, farPlane);
+
 
   // temporary
   instance->setupTimer();
@@ -216,10 +227,8 @@ void Engine::initialize(int *argc, char *argv[]) {
     instance->onKeyboardUp(key, x, y);
   });
   glutReshapeFunc([](int w, int h) { instance->onReshape(w, h); });
-
   glutPassiveMotionFunc([](int x, int y) { instance->onMotion(x, y); });
   glutMotionFunc([](int x, int y) { instance->onMotion(x, y); });
-
   glutMouseWheelFunc([](int wheel, int direction, int x, int y) {
     instance->onMouseWheel(wheel, direction, x, y);
   });
