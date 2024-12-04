@@ -22,6 +22,8 @@ protected:
 
   Cube cube;
 
+  Shape3D *gem;
+
   float farPlane;
   float nearPlane;
   float fov;

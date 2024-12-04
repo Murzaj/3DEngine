@@ -1,5 +1,5 @@
 #include "Engine.hpp"
-#include "Cube.hpp"
+#include "ModelLoader.hpp"
 
 #include <GL/freeglut.h>
 #include <GL/freeglut_std.h>
@@ -15,15 +15,6 @@
 #include <glm/trigonometric.hpp>
 
 Engine *Engine::instance = nullptr;
-
-Engine::Engine() {
-  name = "3D Engine";
-  width = 800;
-  height = 600;
-  fixedUpdateMs = 20;
-  fullscreen = false;
-  displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
-}
 
 void Engine::fixedUpdate() {
   angle += 1.0f;
@@ -81,7 +72,7 @@ void Engine::display() {
   cubeTransform = glm::rotate(cubeTransform, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
   glLoadMatrixf(glm::value_ptr(cubeTransform));
-  cube.draw();
+  gem->draw();
 
   // Draw a yellow wireframe cone
   glm::mat4 coneTransform(view);
@@ -118,7 +109,20 @@ void Engine::onKeyboard(unsigned char key, int x, int y) {
 
 void Engine::onKeyboardUp(unsigned char key, int x, int y) {}
 
-Engine::~Engine() { instance = nullptr; }
+Engine::Engine() {
+  name = "3D Engine";
+  width = 800;
+  height = 600;
+  fixedUpdateMs = 20;
+  fullscreen = false;
+  displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
+  gem = modelloader::shapeFromOBJ("gem.obj");
+}
+
+Engine::~Engine() { 
+  delete gem;
+  instance = nullptr;
+}
 
 void Engine::mainLoop() { glutMainLoop(); }
 

@@ -7,10 +7,10 @@
 
 int main(int argc, char **argv) 
 {   
-    std::srand(std::time(NULL));
-    Engine engine;
-    engine.setVideoMode(800, 600, false, true);
-    engine.setFixedUpdateFps(60);
-    engine.initialize(&argc, argv);
-    return 0;
+  std::srand(std::time(NULL));
+  Engine engine;
+  engine.setVideoMode(800, 600, false, true);
+  engine.setFixedUpdateFps(60);
+  engine.initialize(&argc, argv);
+  return 0;
 }

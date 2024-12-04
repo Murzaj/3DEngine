@@ -8,8 +8,8 @@ float randFloat() {
   return dist(rng);
 }
 
-Cube::Cube() {
-  verts = {
+Cube::Cube() : Shape3D(
+  {
     -1.0f, -1.0f, +1.0f,
     -1.0f, -1.0f, -1.0f,
     +1.0f, -1.0f, -1.0f,
@@ -18,9 +18,8 @@ Cube::Cube() {
     -1.0f, +1.0f, -1.0f, 
     +1.0f, +1.0f, -1.0f,  
     +1.0f, +1.0f, +1.0f, 
-  };
-
-  colors = {
+  },
+  {
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
@@ -29,9 +28,8 @@ Cube::Cube() {
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
-  };
-
-  indices = {
+  },
+  {
     0,1,2,
     0,2,3,
     4,5,6,
@@ -44,5 +42,5 @@ Cube::Cube() {
     7,6,2,
     0,3,7,
     7,4,0
-  };
-}
+  }
+) {}
