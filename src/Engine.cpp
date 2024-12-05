@@ -25,13 +25,13 @@ Engine::Engine() {
   displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
   gem = modelloader::shapeFromOBJ("gem.obj");
   orb = modelloader::shapeFromOBJ("orb.obj");
-  monkey = modelloader::shapeFromOBJ("Monkey.obj");
+  donut = modelloader::shapeFromOBJ("Donut.obj");
 }
 
 Engine::~Engine() { 
   delete gem;
   delete orb;
-  delete monkey;
+  delete donut;
   instance = nullptr;
 }
 
@@ -59,12 +59,12 @@ void Engine::display() {
   */
 
 
-  glm::mat4 monkeyT =
+  glm::mat4 gemT =
       glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
-  monkeyT = glm::rotate(monkeyT, glm::radians(-angle),
+  gemT = glm::rotate(gemT, glm::radians(-angle),
                                 glm::vec3(0.0f, 1.0f, 0.0f));
-  glLoadMatrixf(glm::value_ptr(monkeyT));
-  monkey->draw();
+  glLoadMatrixf(glm::value_ptr(gemT));
+  gem->draw();
 
 
   // Draw a green wireframe sphere
@@ -84,14 +84,14 @@ void Engine::display() {
 
 
   // glColor3f(1.0f, 1.0f, 1.0f);
-  glm::mat4 gemT(view);
+  glm::mat4 donutT(view);
   // translate, then scale, then rotate!
-  gemT = glm::translate(gemT, glm::vec3(-1.0f, -1.0f, 0.0f));
-  gemT = glm::scale(gemT, glm::vec3(0.5f));
-  gemT = glm::rotate(gemT, glm::radians(-angle),
+  donutT = glm::translate(donutT, glm::vec3(-1.0f, -1.0f, 0.0f));
+  donutT = glm::scale(donutT, glm::vec3(0.5f));
+  donutT = glm::rotate(donutT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
-  glLoadMatrixf(glm::value_ptr(gemT));
-  gem->draw();
+  glLoadMatrixf(glm::value_ptr(donutT));
+  donut->draw();
 
   // originally glutWireCone
   glm::mat4 cubeT(view);

@@ -24,7 +24,7 @@ protected:
 
   Shape3D *gem;
   Shape3D *orb;
-  Shape3D *monkey;
+  Shape3D *donut;
 
   float farPlane;
   float nearPlane;
