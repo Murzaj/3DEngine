@@ -26,16 +26,23 @@ Engine::Engine() {
   gem = modelloader::shapeFromOBJ("gem.obj");
   orb = modelloader::shapeFromOBJ("orb.obj");
   donut = modelloader::shapeFromOBJ("Donut.obj");
+  observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
+  cube = new Cube();
+  cube->translate(glm::vec3(-3,0,0));
+  cube->scale(glm::vec3(0.8));
 }
 
 Engine::~Engine() { 
   delete gem;
   delete orb;
   delete donut;
+  delete observer;
+  delete cube;
   instance = nullptr;
 }
 
 void Engine::display() {
+  const auto view = observer->getTransform();
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
 
@@ -59,12 +66,15 @@ void Engine::display() {
   */
 
 
+  /*
   glm::mat4 gemT =
       glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
   gemT = glm::rotate(gemT, glm::radians(-angle),
                                 glm::vec3(0.0f, 1.0f, 0.0f));
-  glLoadMatrixf(glm::value_ptr(gemT));
-  gem->draw();
+                              */
+  glm::mat4 cubeMVP = view * cube->getTransform();
+  glLoadMatrixf(glm::value_ptr(cubeMVP));
+  cube->draw();
 
 
   // Draw a green wireframe sphere
@@ -76,9 +86,9 @@ void Engine::display() {
   glLoadMatrixf(glm::value_ptr(sphereTransform));
   glutWireSphere(0.5, 20, 20);
   */
-  glm::mat4 orbT(view);
-  orbT = glm::translate(orbT, glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(orbT));
+  orb->setTransform(view);
+  //orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(orb->getTransform()));
   orb->draw();
 
 
@@ -113,6 +123,7 @@ void Engine::fixedUpdate() {
   if (angle >= 360.0f) {
     angle -= 360.0f;
   }
+  cube->rotate(glm::radians(1.0f), glm::vec3(0,1,0));
 }
 
 void Engine::setupTimer() {
@@ -193,7 +204,7 @@ void Engine::onMotion(int x, int y) {
 
   int dx = x - halfw;
   if (std::abs(dx) >= 0) {
-    view = glm::rotate<float>(view, dx / 100.f, glm::vec3(0.0, 1.0, 0.0));
+    observer->rotate(dx / 100.f, glm::vec3(0.0, 1.0, 0.0));
   }
 }
 
@@ -234,12 +245,6 @@ void Engine::initialize(int *argc, char *argv[]) {
 
   nearPlane = 0.1f;
   farPlane = 100.0f;
-
-  cameraPos = glm::vec3(0.0f, 0.0f, 8.0f);
-  cameraTarget = glm::vec3(0.0f, 0.0f, 0.0f);
-  cameraUp = glm::vec3(0.0f, 1.0f, 0.0f);
-
-  view = glm::lookAt(cameraPos, cameraTarget, cameraUp);
   projection = glm::perspective(fov, width / (float)height, nearPlane, farPlane);
 
 

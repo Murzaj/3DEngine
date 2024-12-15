@@ -1,6 +1,8 @@
 #pragma once
 
 #include "Cube.hpp"
+#include "Observer.hpp"
+
 #include <GL/glew.h>
 #include <glm/ext/matrix_clip_space.hpp>
 #include <glm/fwd.hpp>
@@ -15,13 +17,9 @@ protected:
   std::string name;
 
   // Initialize the camera and projection matrix
-  glm::vec3 cameraPos;
-  glm::vec3 cameraTarget;
-  glm::vec3 cameraUp;
-  glm::mat4 view;
+  Observer *observer;
 
-  Cube cube;
-
+  Cube *cube;
   Shape3D *gem;
   Shape3D *orb;
   Shape3D *donut;

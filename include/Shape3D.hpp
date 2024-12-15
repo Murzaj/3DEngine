@@ -1,9 +1,9 @@
 #pragma once
 
-
+#include "TransformableObject.hpp"
 #include <vector>
 
-class Shape3D {
+class Shape3D : public TransformableObject {
 protected:
   std::vector<float> verts;
   std::vector<float> colors;
