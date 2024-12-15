@@ -28,6 +28,8 @@ Cube::Cube() : Shape3D(
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
     randFloat(), randFloat(), randFloat(),
+  }, 
+  {
   },
   {
     0,1,2,

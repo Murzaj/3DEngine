@@ -1,6 +1,5 @@
 #pragma once
 
-#include "Cube.hpp"
 #include "Observer.hpp"
 
 #include <GL/glew.h>
@@ -19,7 +18,7 @@ protected:
   // Initialize the camera and projection matrix
   Observer *observer;
 
-  Cube *cube;
+  Shape3D *cube;
   Shape3D *gem;
   Shape3D *orb;
   Shape3D *donut;

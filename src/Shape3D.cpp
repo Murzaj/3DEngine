@@ -4,8 +4,9 @@
 Shape3D::Shape3D(
   const std::vector<float> &verts,
   const std::vector<float> &colors,
+  const std::vector<float> &normals,
   const std::vector<unsigned int> &indices
-) : verts(verts), colors(colors), indices(indices) {}
+) : verts(verts), colors(colors), indices(indices), normals(normals) {}
 
 void Shape3D::draw() {
   glEnableClientState(GL_VERTEX_ARRAY);

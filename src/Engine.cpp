@@ -14,6 +14,8 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 
+#include "CubeLightVerts.hpp"
+
 Engine *Engine::instance = nullptr;
 
 Engine::Engine() {
@@ -27,7 +29,7 @@ Engine::Engine() {
   orb = modelloader::shapeFromOBJ("orb.obj");
   donut = modelloader::shapeFromOBJ("Donut.obj");
   observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
-  cube = new Cube();
+  cube = new CubeLightVerts();
   cube->translate(glm::vec3(-3,0,0));
   cube->scale(glm::vec3(0.8));
 }
@@ -238,8 +240,6 @@ void Engine::initialize(int *argc, char *argv[]) {
 
   glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 
-  //
-  //
   const float DEG_IN_RAD = 0.01745329;
   fov = 80 * DEG_IN_RAD;
 
