@@ -87,7 +87,7 @@ void Engine::display() {
   glutWireSphere(0.5, 20, 20);
   */
   orb->setTransform(view);
-  //orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
+  orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
   glLoadMatrixf(glm::value_ptr(orb->getTransform()));
   orb->draw();
 
