@@ -80,6 +80,6 @@ Shape3D *modelloader::shapeFromOBJ(const std::string &filename) {
     outFaces.push_back(f[2].vertIdx-1);
   }
   std::cout << "Stats:\nV:"<<outVertices.size()<<"\nF:"<<outFaces.size()/3<<"\n";
-  Shape3D *shape = new Shape3D(outVertices, outColors, outFaces);
+  Shape3D *shape = new Shape3D(outVertices, outColors, {}, outFaces);
   return shape;
 }
