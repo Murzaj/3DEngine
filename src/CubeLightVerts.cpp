@@ -110,10 +110,10 @@ CubeLightVerts::CubeLightVerts() :
 void CubeLightVerts::draw() {
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_FLOAT, 0, &verts.front());
-  glEnableClientState(GL_COLOR_ARRAY);
-  glColorPointer(3, GL_FLOAT, 0, &colors.front());
   glEnableClientState(GL_NORMAL_ARRAY);
   glNormalPointer(3, GL_FLOAT, &normals.front());
+  glEnableClientState(GL_COLOR_ARRAY);
+  glColorPointer(3, GL_FLOAT, 0, &colors.front());
   glDrawElements(
     GL_TRIANGLES,
     indices.size(),

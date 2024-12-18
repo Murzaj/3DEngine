@@ -1,4 +1,5 @@
 #include "Cube.hpp"
+#include <glm/geometric.hpp>
 #include <random>
 
 float randFloat() {
@@ -8,7 +9,7 @@ float randFloat() {
   return dist(rng);
 }
 
-Cube::Cube() : Shape3D(
+Cube::Cube() : Shape3D (
   {
     -1.0f, -1.0f, +1.0f,
     -1.0f, -1.0f, -1.0f,

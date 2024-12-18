@@ -3,6 +3,7 @@
 
 #include <GL/freeglut.h>
 #include <GL/freeglut_std.h>
+#include <GL/gl.h>
 #include <GL/glew.h>
 #include <GL/glu.h>
 #include <cmath>
@@ -45,8 +46,15 @@ Engine::~Engine() {
 
 void Engine::display() {
   const auto view = observer->getTransform();
-  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
   glEnable(GL_DEPTH_TEST);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  //glEnable(GL_COLOR_MATERIAL);
+
+  glShadeModel(GL_SMOOTH);
+
+  glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
   glLoadIdentity(); // Reset transformations
   // Set up the projection matrix
@@ -55,6 +63,34 @@ void Engine::display() {
   // Set up the view matrix (camera)
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
+
+
+  GLfloat amb[] = {0.2, 0.2, 0.2, 1.0}; // RGBA
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
+
+  GLfloat diff[] = {0.9, 0.9, 0.9, 1.0}; // RGBA
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
+  GLfloat spec[] = {1.0, 1.0, 1.0, 1.0}; // RGBA
+  //
+  glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
+  GLfloat pos[] = {4.0, 2.0, 0.0, 1.0};
+  glLightfv(GL_LIGHT0, GL_POSITION, pos);
+
+  //glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
+  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
+  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 1.0);
+
+
+  //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+
+  GLfloat amb_diff[] = {0.0, 0.0, 1.0, 1.0};
+  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amb_diff);
+  GLfloat specul[] = {1.0, 1.0, 1.0, 1.0};
+  glMaterialfv(GL_FRONT, GL_SPECULAR, specul);
+  GLfloat emiss[] = {0.0, 0.0, 0.0, 1.0};
+  glMaterialfv(GL_FRONT, GL_EMISSION, emiss);
+
+
 
   // Draw a red solid teapot
   /*
@@ -76,7 +112,7 @@ void Engine::display() {
                               */
   glm::mat4 cubeMVP = view * cube->getTransform();
   glLoadMatrixf(glm::value_ptr(cubeMVP));
-  cube->draw();
+  donut->draw();
 
 
   // Draw a green wireframe sphere
@@ -103,7 +139,8 @@ void Engine::display() {
   donutT = glm::rotate(donutT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
   glLoadMatrixf(glm::value_ptr(donutT));
-  donut->draw();
+  glutSolidTeapot(1.0);
+  //cube->draw();
 
   // originally glutWireCone
   glm::mat4 cubeT(view);
@@ -228,7 +265,6 @@ void Engine::initialize(int *argc, char *argv[]) {
   glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
   glutSetOption(GLUT_MULTISAMPLE, 4);
   glutInitDisplayMode(displayMode);
-
   glutInitWindowSize(width, height);
   glutInitWindowPosition(100, 100);
   glutCreateWindow(name.c_str());
