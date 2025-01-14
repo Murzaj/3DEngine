@@ -15,7 +15,11 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 
-#include "CubeLightVerts.hpp"
+#include "CubeGenerated.hpp"
+
+#define STB_IMAGE_IMPLEMENTATION
+#include "ext/stb_image.h"
+
 
 Engine *Engine::instance = nullptr;
 
@@ -30,7 +34,7 @@ Engine::Engine() {
   orb = modelloader::shapeFromOBJ("orb.obj");
   donut = modelloader::shapeFromOBJ("Donut.obj");
   observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
-  cube = new CubeLightVerts();
+  cube = new Cube3D();
   cube->translate(glm::vec3(-3,0,0));
   cube->scale(glm::vec3(0.8));
 }
@@ -50,7 +54,7 @@ void Engine::display() {
   glEnable(GL_NORMALIZE);
   glEnable(GL_LIGHTING);
   glEnable(GL_LIGHT0);
-  //glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_COLOR_MATERIAL);
 
   glShadeModel(GL_SMOOTH);
 
@@ -73,6 +77,7 @@ void Engine::display() {
   GLfloat spec[] = {1.0, 1.0, 1.0, 1.0}; // RGBA
   //
   glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
+
   GLfloat pos[] = {4.0, 2.0, 0.0, 1.0};
   glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
@@ -81,10 +86,12 @@ void Engine::display() {
   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 1.0);
 
 
-  //glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
+  glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
+  /*
   GLfloat amb_diff[] = {0.0, 0.0, 1.0, 1.0};
   glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amb_diff);
+  */
   GLfloat specul[] = {1.0, 1.0, 1.0, 1.0};
   glMaterialfv(GL_FRONT, GL_SPECULAR, specul);
   GLfloat emiss[] = {0.0, 0.0, 0.0, 1.0};
@@ -124,6 +131,7 @@ void Engine::display() {
   glLoadMatrixf(glm::value_ptr(sphereTransform));
   glutWireSphere(0.5, 20, 20);
   */
+
   orb->setTransform(view);
   orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
   glLoadMatrixf(glm::value_ptr(orb->getTransform()));
@@ -131,7 +139,14 @@ void Engine::display() {
 
 
 
-  // glColor3f(1.0f, 1.0f, 1.0f);
+  glm::mat4 ballT(view);
+  ballT = glm::translate(ballT, glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(ballT));
+  glutSolidSphere(1.1f, 24, 12);
+
+
+
+  glColor3f(1.0f, 0.0f, 0.0f);
   glm::mat4 donutT(view);
   // translate, then scale, then rotate!
   donutT = glm::translate(donutT, glm::vec3(-1.0f, -1.0f, 0.0f));
@@ -139,8 +154,7 @@ void Engine::display() {
   donutT = glm::rotate(donutT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
   glLoadMatrixf(glm::value_ptr(donutT));
-  glutSolidTeapot(1.0);
-  //cube->draw();
+  cube->draw();
 
   // originally glutWireCone
   glm::mat4 cubeT(view);
@@ -275,6 +289,24 @@ void Engine::initialize(int *argc, char *argv[]) {
   glewInit();
 
   glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+
+
+  // take care of textures
+  glGenTextures(1, &testRockTexture);
+  glBindTexture(GL_TEXTURE_2D, testRockTexture);
+  int width, height, nchan;
+  unsigned char* dt;
+  dt = stbi_load("texture.jpg", &width, &height, &nchan, 0);
+  if (!dt) exit(0);
+  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dt);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+  stbi_image_free(dt);
+
+
+
+
+
 
   const float DEG_IN_RAD = 0.01745329;
   fov = 80 * DEG_IN_RAD;

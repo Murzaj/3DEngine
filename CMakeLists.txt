@@ -4,7 +4,7 @@ project(3DEngineProject)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 set(CMAKE_CXX_STANDARD 17)
 
-FILE(GLOB_RECURSE INCLUDE include/*.hpp include/*.h)
+FILE(GLOB_RECURSE INCLUDE include/*.hpp include/*.h include/ext/*.h)
 FILE(GLOB_RECURSE SOURCES src/*.cpp)
 
 # Replace backslashes with forward slashes in PATH

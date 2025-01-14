@@ -1,5 +1,6 @@
 #pragma once
 
+#include "Shape3D.hpp"
 #include "Observer.hpp"
 
 #include <GL/glew.h>
@@ -34,6 +35,9 @@ protected:
   unsigned int displayMode;
   bool fullscreen;
 
+
+
+  GLuint testRockTexture;
 
   glm::mat4 projection;
 

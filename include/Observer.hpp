@@ -1,4 +1,5 @@
-#include "Cube.hpp"
+#pragma once 
+#include "TransformableObject.hpp"
 #include <glm/glm.hpp>
 
 class Observer : public TransformableObject { 
