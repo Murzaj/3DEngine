@@ -1,4 +1,5 @@
 #include "Engine.hpp"
+#include "CubeSmooth3D.hpp"
 #include "ModelLoader.hpp"
 
 #include <GL/freeglut.h>
@@ -15,7 +16,7 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
 
-#include "CubeGenerated.hpp"
+#include "Cube3D.hpp"
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
@@ -50,11 +51,6 @@ Engine::~Engine() {
 
 void Engine::display() {
   const auto view = observer->getTransform();
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_COLOR_MATERIAL);
 
   glShadeModel(GL_SMOOTH);
 
@@ -117,21 +113,13 @@ void Engine::display() {
   gemT = glm::rotate(gemT, glm::radians(-angle),
                                 glm::vec3(0.0f, 1.0f, 0.0f));
                               */
+  glColor3f(0.8, 1.0, 1.0);
   glm::mat4 cubeMVP = view * cube->getTransform();
   glLoadMatrixf(glm::value_ptr(cubeMVP));
-  donut->draw();
+  glutSolidTeapot(1.0f);
 
 
-  // Draw a green wireframe sphere
-  /*
-  glColor3f(0.0f, 1.0f, 0.0f);
-  glm::mat4 sphereTransform(view);
-  sphereTransform =
-      glm::translate(sphereTransform, glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(sphereTransform));
-  glutWireSphere(0.5, 20, 20);
-  */
-
+  glColor3f(1.0, 0.0, 0.0);
   orb->setTransform(view);
   orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
   glLoadMatrixf(glm::value_ptr(orb->getTransform()));
@@ -154,7 +142,10 @@ void Engine::display() {
   donutT = glm::rotate(donutT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
   glLoadMatrixf(glm::value_ptr(donutT));
+
+  glBindTexture(GL_TEXTURE_2D, testRockTexture);
   cube->draw();
+  glBindTexture(GL_TEXTURE_2D, 0);
 
   // originally glutWireCone
   glm::mat4 cubeT(view);
@@ -167,9 +158,6 @@ void Engine::display() {
 
   glutSwapBuffers();
 }
-
-
-
 
 void Engine::fixedUpdate() {
   angle += 1.0f;
@@ -288,8 +276,13 @@ void Engine::initialize(int *argc, char *argv[]) {
   glutSetCursor(GLUT_CURSOR_NONE);
   glewInit();
 
+  glEnable(GL_DEPTH_TEST);
+  glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_TEXTURE_2D);
   glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
-
 
   // take care of textures
   glGenTextures(1, &testRockTexture);
@@ -302,9 +295,6 @@ void Engine::initialize(int *argc, char *argv[]) {
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
   glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
   stbi_image_free(dt);
-
-
-
 
 
 

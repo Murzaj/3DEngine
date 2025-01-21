@@ -21,7 +21,7 @@ void Shape3D::draw() {
 
   if(!normals.empty()) {
     glEnableClientState(GL_NORMAL_ARRAY);
-    glColorPointer(3, GL_FLOAT, 0, &normals.front());
+    glNormalPointer(GL_FLOAT, 0, &normals.front());
   }
 
   if(!texCoords.empty()) {
