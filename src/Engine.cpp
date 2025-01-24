@@ -37,7 +37,7 @@ Engine::Engine() {
   gem = modelloader::shapeFromOBJGenerated("gem.obj");
   orb = modelloader::shapeFromOBJGenerated("orb.obj");
   donut = modelloader::shapeFromOBJGenerated("Donut.obj");
-  observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
+  observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,0.5,0));
   cube = new Cube3D();
   cube->translate(glm::vec3(-3,0,0));
   cube->scale(glm::vec3(0.8));
@@ -133,11 +133,15 @@ void Engine::display() {
   glutSolidTeapot(1.0f);
 
 
-  glColor3f(1.0, 0.0, 0.0);
+
+
+  glColor3f(1.0, 1.0, 1.0);
   donut->setTransform(view);
   donut->translate(glm::vec3(sphereX, sphereY, 0.0f));
   glLoadMatrixf(glm::value_ptr(donut->getTransform()));
+  glBindTexture(GL_TEXTURE_2D, bitmapHandler->getBitmap("donut"));
   donut->draw();
+  glBindTexture(GL_TEXTURE_2D, 0);
 
 
 /*
@@ -150,13 +154,13 @@ void Engine::display() {
 
 
   glColor3f(1.0f, 0.0f, 0.0f);
-  glm::mat4 donutT(view);
+  glm::mat4 rockT(view);
   // translate, then scale, then rotate!
-  donutT = glm::translate(donutT, glm::vec3(-1.0f, -1.0f, 0.0f));
-  donutT = glm::scale(donutT, glm::vec3(0.5f));
-  donutT = glm::rotate(donutT, glm::radians(-angle),
+  rockT = glm::translate(rockT, glm::vec3(-1.0f, -1.0f, 0.0f));
+  rockT = glm::scale(rockT, glm::vec3(0.5f));
+  rockT = glm::rotate(rockT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
-  glLoadMatrixf(glm::value_ptr(donutT));
+  glLoadMatrixf(glm::value_ptr(rockT));
   glBindTexture(GL_TEXTURE_2D, rockTexture);
   cube->draw();
   glBindTexture(GL_TEXTURE_2D, 0);
@@ -302,6 +306,7 @@ void Engine::initialize(int *argc, char *argv[]) {
 
   // take care of textures
   bitmapHandler->loadBitmap("rock", "rock.jpg", GL_LINEAR, GL_LINEAR);
+  bitmapHandler->loadBitmap("donut", "donut.jpg", GL_LINEAR, GL_LINEAR);
 
 
 
