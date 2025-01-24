@@ -1,8 +1,9 @@
 #pragma once
 
+#include "GameObject.hpp"
 #include <glm/ext/matrix_float4x4.hpp>
 
-class TransformableObject {
+class TransformableObject : public virtual GameObject {
 protected:
   glm::mat4 transform;
 public:

@@ -1,18 +1,19 @@
-#include "Shape3D.hpp"
+#include "ModelShape3D.hpp"
 
 #include <GL/gl.h>
+#include <glm/gtc/type_ptr.hpp>
 
-Shape3D::Shape3D(
-  const std::vector<float> &verts,
-  const std::vector<float> &colors,
-  const std::vector<float> &normals,
-  const std::vector<unsigned int> &indices,
+ModelShape3D::ModelShape3D( const std::vector<float> &verts, const std::vector<float> &colors, glm::vec3 modulateColor, const std::vector<float> &normals, const std::vector<unsigned int> &indices,
   const std::vector<float> &texCoord
-) : verts(verts), colors(colors), indices(indices), normals(normals), texCoords(texCoord) {}
+) : verts(verts), colors(colors), modulateColor(modulateColor), indices(indices), normals(normals), texCoords(texCoord) {}
 
-void Shape3D::draw() {
+void ModelShape3D::draw(const glm::mat4 &view) {
+  glm::mat4 mvp = view * getTransform();
+  glLoadMatrixf(glm::value_ptr(mvp));
+  glColor3f(modulateColor.r, modulateColor.g, modulateColor.b);
   glEnableClientState(GL_VERTEX_ARRAY);
   glVertexPointer(3, GL_FLOAT, 0, &verts.front());
+
 
   if(!colors.empty()) {
     glEnableClientState(GL_COLOR_ARRAY);
@@ -36,4 +37,5 @@ void Shape3D::draw() {
     &indices.front());
   glDisableClientState(GL_VERTEX_ARRAY);
   glDisableClientState(GL_COLOR_ARRAY);
+  glColor3f(1.0, 1.0, 1.0);
 }

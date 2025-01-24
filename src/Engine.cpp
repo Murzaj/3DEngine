@@ -1,6 +1,10 @@
 #include "Engine.hpp"
+#include "Cube3D.hpp"
 #include "CubeSmooth3D.hpp"
 #include "ModelLoader.hpp"
+#include "SphereShape3D.hpp"
+#include "TexturedPlane3D.hpp"
+#include "UpdatableObject.hpp"
 
 #include <GL/freeglut.h>
 #include <GL/freeglut_std.h>
@@ -10,13 +14,12 @@
 #include <cmath>
 #include <cstdio>
 #include <cstdlib>
-#include <glm/ext/matrix_transform.hpp>
-#include <glm/fwd.hpp>
 #include <glm/glm.hpp>
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/trigonometric.hpp>
-
-#include "Cube3D.hpp"
+#include <algorithm>
+#include <iostream>
+#include <ostream>
 
 #define STB_IMAGE_IMPLEMENTATION
 #include "ext/stb_image.h"
@@ -30,42 +33,55 @@ Engine::Engine() {
   height = 600;
   fixedUpdateMs = 20;
   fullscreen = false;
-
   bitmapHandler = new BitmapHandler();
-
   displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
-  gem = modelloader::shapeFromOBJGenerated("gem.obj");
-  orb = modelloader::shapeFromOBJGenerated("orb.obj");
-  donut = modelloader::shapeFromOBJGenerated("Donut.obj");
-  observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,0.5,0));
-  cube = new Cube3D();
-  cube->translate(glm::vec3(-3,0,0));
-  cube->scale(glm::vec3(0.8));
-
-
-
-
 }
 
 Engine::~Engine() { 
-  delete gem;
-  delete orb;
-  delete donut;
-  delete observer;
-  delete cube;
+  cleanupObjects();
   delete bitmapHandler;
   instance = nullptr;
 }
 
+
+void Engine::setupLight(
+                        const glm::vec3 &ambient,
+                        const glm::vec3 &diffuse,
+                        const glm::vec3 &specular,
+                        const glm::vec3 &position,
+                        const glm::vec3 &direction,
+                        float spotCutoffAngle,
+                        float spotExponent,
+                        float constantAttantuation,
+                        float linearAttentuation,
+                        float quadraticAttentuation
+) {
+  glEnable(GL_LIGHT0);
+  GLfloat amb[] = {ambient.r, ambient.g, ambient.b, 1.0}; // RGBA
+  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
+
+  GLfloat diff[] = {diffuse.r, diffuse.g, diffuse.b, 1.0}; // RGBA
+  glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
+
+  GLfloat spec[] = {specular.r, specular.g, specular.b, 1.0}; // RGBA
+  glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
+
+  GLfloat lightPos[] = {position.x, position.y, position.z, 1.0};
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+  GLfloat spotDir[] = {direction.x, direction.y, direction.z};
+  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
+  glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, spotCutoffAngle);
+  glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, spotExponent);
+  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, constantAttantuation);
+  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, linearAttentuation);
+  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, quadraticAttentuation);
+}
+
 void Engine::display() {
   const auto view = observer->getTransform();
-
-  GLuint rockTexture = bitmapHandler->getBitmap("rock");
-
   glShadeModel(GL_SMOOTH);
-
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
   glLoadIdentity(); // Reset transformations
   // Set up the projection matrix
   glMatrixMode(GL_PROJECTION);
@@ -74,105 +90,34 @@ void Engine::display() {
   glMatrixMode(GL_MODELVIEW);
   glLoadMatrixf(glm::value_ptr(view));
 
-
-  // LIGHT SETTINGS HERE
-  GLfloat amb[] = {0.2, 0.2, 0.2, 1.0}; // RGBA
-  glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
-  GLfloat diff[] = {0.9, 0.9, 0.9, 1.0}; // RGBA
-  glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
-  GLfloat spec[] = {1.0, 1.0, 1.0, 1.0}; // RGBA
-  glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
-
-
-  lightPos[0] = 0.0;
-  lightPos[1] = 3.0;
-  lightPos[2] = 0.0;
-  lightPos[3] = 1.0;
-  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
-
-
-  // kierunek swiatla
-  GLfloat spotDir[] = {0.0, -1.0, 0.0};
-  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
-
-  // połowa kąta rozwarcia stożka światła
-  glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);
-
-  // skupienie światła 0-128
-  glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 40.0);
-
-
-  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
-  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
-  glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 1.0);
-
-
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
 
-  /*
-  GLfloat amb_diff[] = {0.0, 0.0, 1.0, 1.0};
-  glMaterialfv(GL_FRONT, GL_AMBIENT_AND_DIFFUSE, amb_diff);
-  */
   GLfloat specul[] = {1.0, 1.0, 1.0, 1.0};
   glMaterialfv(GL_FRONT, GL_SPECULAR, specul);
   GLfloat emiss[] = {0.0, 0.0, 0.0, 1.0};
   glMaterialfv(GL_FRONT, GL_EMISSION, emiss);
 
 
-  // TEST DRAW LIGHT POS
-  //glColor3f(1.0, 1.0, 0.0);
-  //glm::mat4 lightT = glm::translate(view, glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
-  //glLoadMatrixf(glm::value_ptr(lightT));
-  //glutSolidSphere(1.0, 12, 12);
+  //TEST
+  glColor3f(1.0, 1.0, 0.0);
+  glm::mat4 lightT = glm::translate(view, glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
+  glLoadMatrixf(glm::value_ptr(lightT));
+  glutSolidSphere(1.0, 12, 12);
 
 
 
-  glColor3f(0.8, 1.0, 1.0);
-  glm::mat4 cubeMVP = view * cube->getTransform();
-  glLoadMatrixf(glm::value_ptr(cubeMVP));
-  glutSolidTeapot(1.0f);
+  for (auto shape : shapes) {
+    shape->draw(view);
+  }
 
 
+  ground->draw(view);
 
 
-  glColor3f(1.0, 1.0, 1.0);
-  donut->setTransform(view);
-  donut->translate(glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(donut->getTransform()));
-  glBindTexture(GL_TEXTURE_2D, bitmapHandler->getBitmap("donut"));
-  donut->draw();
-  glBindTexture(GL_TEXTURE_2D, 0);
+  sphereBasicTest->draw(view);
 
 
-/*
-  glm::mat4 ballT(view);
-  ballT = glm::translate(ballT, glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(ballT));
-  glutSolidSphere(1.1f, 24, 12);
-  */
-
-
-
-  glColor3f(1.0f, 0.0f, 0.0f);
-  glm::mat4 rockT(view);
-  // translate, then scale, then rotate!
-  rockT = glm::translate(rockT, glm::vec3(-1.0f, -1.0f, 0.0f));
-  rockT = glm::scale(rockT, glm::vec3(0.5f));
-  rockT = glm::rotate(rockT, glm::radians(-angle),
-                              glm::vec3(0.0f, 1.0f, 1.0f));
-  glLoadMatrixf(glm::value_ptr(rockT));
-  glBindTexture(GL_TEXTURE_2D, rockTexture);
-  cube->draw();
-  glBindTexture(GL_TEXTURE_2D, 0);
-
-  // originally glutWireCone
-  glm::mat4 cubeT(view);
-  cubeT = glm::translate(cubeT, glm::vec3(1.0f, -1.0f, 0.0f));
-  cubeT =
-      glm::rotate(cubeT, glm::radians(angle), glm::vec3(0.0, 1.0, 0.0));
-  glColor3f(1.0f, 1.0f, 0.0f);
-  glLoadMatrixf(glm::value_ptr(cubeT));
-  //glutWireCone(0.5, 1.0, 20, 20);
+  cube->draw(view);
 
   glutSwapBuffers();
 }
@@ -183,6 +128,39 @@ void Engine::fixedUpdate() {
     angle -= 360.0f;
   }
   cube->rotate(glm::radians(1.0f), glm::vec3(0,1,0));
+
+  auto motion = inputMap->getMouseMotion();
+
+  if (std::abs(motion.x) >= 0) {
+    sphereBasicTest->translate(glm::vec3(motion.x/20.0f, 0.0, motion.y/20.0f));
+    //observer->rotate(motion.x / 100.f, glm::vec3(0.0, 1.0, 0.0));
+  }
+
+  if(inputMap->isKeyDown(27)) {
+    std::exit(0);
+  }
+  if(inputMap->isKeyJustPressed('l')) {
+    toggleLighting();
+  }
+
+  if (inputMap->isKeyDown('a')) {
+    sphereX -= .2f;
+  }
+  if (inputMap->isKeyDown('d')) {
+    sphereX += .2f;
+  }
+  if (inputMap->isKeyDown('w')) {
+    sphereY += .2f;
+  }
+  if (inputMap->isKeyDown('s')) {
+    sphereY -= .2f;
+  }
+
+  for(auto updatable : updatables) {
+    updatable->update(fixedUpdateMs, *inputMap, this);
+  }
+
+  inputMap->resetTemporary();
 }
 
 void Engine::setupTimer() {
@@ -199,28 +177,29 @@ void Engine::setupTimer() {
 
 
 void Engine::onSpecial(int key, int x, int y) {}
-
 void Engine::onSpecialUp(int key, int x, int y) {}
 
-void Engine::onKeyboard(unsigned char key, int x, int y) {
-  if (key == 27) {
-    std::exit(0);
+void Engine::toggleLighting() {
+  if (lightingEnabled) {
+    glDisable(GL_LIGHTING);
+    lightingEnabled = false;
   }
-  if (key == 'a') {
-    sphereX += .2f;
+  else {
+    glEnable(GL_LIGHTING);
+    lightingEnabled = true;
   }
-  if (key == 'd') {
-    sphereX -= .2f;
-  }
-  if (key == 'w') {
-    sphereY += .2f;
-  }
-  if (key == 's') {
-    sphereY -= .2f;
-  }
+
 }
 
-void Engine::onKeyboardUp(unsigned char key, int x, int y) {}
+
+void Engine::onKeyboard(unsigned char key, int x, int y) {
+  inputMap->setKeyDown(key);
+}
+
+void Engine::onKeyboardUp(unsigned char key, int x, int y) {
+  inputMap->setKeyUp(key);
+}
+
 void Engine::mainLoop() { glutMainLoop(); }
 
 void Engine::onReshape(int width, int height) {
@@ -253,6 +232,7 @@ void Engine::onMotion(int x, int y) {
     warped = false;
     return;
   }
+
   int halfw = width / 2;
   int halfh = height / 2;
 
@@ -262,9 +242,8 @@ void Engine::onMotion(int x, int y) {
   }
 
   int dx = x - halfw;
-  if (std::abs(dx) >= 0) {
-    observer->rotate(dx / 100.f, glm::vec3(0.0, 1.0, 0.0));
-  }
+  int dy = y - halfh;
+  inputMap->setMouseMotion(dx,dy);
 }
 
 void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
@@ -274,49 +253,33 @@ void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
       glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
 }
 
-void Engine::initialize(int *argc, char *argv[]) {
-  if (instance != nullptr) {
-  }
+void Engine::prepareObjects() {
+  gem = modelloader::shapeFromOBJ("gem.obj");
+  orb = modelloader::shapeFromOBJ("orb.obj");
+  observer = new Observer(glm::vec3(0,4,8), glm::vec3(0,0,0), glm::vec3(0,1.0,0));
+  cube = new Cube3D(bitmapHandler->getBitmap("rock"));
+  cube->translate(glm::vec3(-3,0,0));
+  cube->scale(glm::vec3(0.8));
+  sphereBasicTest = new SphereShape3D(glm::vec3(1.0), 1.0, 16, 32);
+  inputMap = new InputMap;
 
-  instance = this;
+  ground = new TexturedPlane3D(glm::vec3(1.0), bitmapHandler->getBitmap("boulder"));
+  ground->translate(glm::vec3(0, -4, 0));
+  ground->scale(glm::vec3(10.0));
+}
 
-  glutInit(argc, argv);
-  glutInitContextVersion(3, 3);
-  glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
-  glutSetOption(GLUT_MULTISAMPLE, 4);
-  glutInitDisplayMode(displayMode);
-  glutInitWindowSize(width, height);
-  glutInitWindowPosition(100, 100);
-  glutCreateWindow(name.c_str());
-  if (fullscreen) {
-    glutFullScreen();
-  }
-  glutSetCursor(GLUT_CURSOR_NONE);
-  glewInit();
-
-  glEnable(GL_DEPTH_TEST);
-  glEnable(GL_NORMALIZE);
-  glEnable(GL_LIGHTING);
-  glEnable(GL_LIGHT0);
-  glEnable(GL_COLOR_MATERIAL);
-  glEnable(GL_TEXTURE_2D);
-  glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+void Engine::cleanupObjects() {
+  delete gem;
+  delete orb;
+  delete ground;
+  delete observer;
+  delete cube;
+  delete sphereBasicTest;
+  delete inputMap;
+}
 
 
-
-  // take care of textures
-  bitmapHandler->loadBitmap("rock", "rock.jpg", GL_LINEAR, GL_LINEAR);
-  bitmapHandler->loadBitmap("donut", "donut.jpg", GL_LINEAR, GL_LINEAR);
-
-
-
-  const float DEG_IN_RAD = 0.01745329;
-  fov = 80 * DEG_IN_RAD;
-
-  nearPlane = 0.1f;
-  farPlane = 100.0f;
-  projection = glm::perspective(fov, width / (float)height, nearPlane, farPlane);
-
+void Engine::prepareCallbacks() {
   // temporary
   instance->setupTimer();
 
@@ -338,5 +301,96 @@ void Engine::initialize(int *argc, char *argv[]) {
     instance->onMouseWheel(wheel, direction, x, y);
   });
 
+}
+
+
+
+bool Engine::initialize(int *argc, char *argv[]) {
+  if (instance != nullptr) {
+    return false;
+  }
+
+  instance = this;
+  glutInit(argc, argv);
+  glutInitContextVersion(3, 3);
+  glutInitContextProfile(GLUT_COMPATIBILITY_PROFILE);
+  glutSetOption(GLUT_MULTISAMPLE, 4);
+  glutInitDisplayMode(displayMode);
+  glutInitWindowSize(width, height);
+  glutInitWindowPosition(100, 100);
+  glutCreateWindow(name.c_str());
+  if (fullscreen) {
+    glutFullScreen();
+  }
+  glutSetCursor(GLUT_CURSOR_NONE);
+  glewInit();
+
+  glEnable(GL_DEPTH_TEST);
+  //glEnable(GL_NORMALIZE);
+  glEnable(GL_LIGHTING);
+  glEnable(GL_LIGHT0);
+  glEnable(GL_COLOR_MATERIAL);
+  glEnable(GL_TEXTURE_2D);
+
+  glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
+
+
+  const float DEG_IN_RAD = 0.01745329;
+  fov = 80 * DEG_IN_RAD;
+  nearPlane = 0.1f;
+  farPlane = 100.0f;
+  projection = glm::perspective(fov, width / (float)height, nearPlane, farPlane);
+  return true;
+}
+
+
+void Engine::run() {
+  prepareObjects();
+  prepareCallbacks();
   mainLoop();
 }
+
+
+ObjectManager *Engine::getObjectManager() { return this; }
+BitmapHandler *Engine::getBitmapHandler() { return bitmapHandler; }
+
+
+
+void Engine::addObject(GameObject *obj) {
+  obj->init(this);
+  // Add to the general objects vector
+  objects.push_back(obj);
+  
+  // Check for DrawableObject interface
+  if (auto shape = dynamic_cast<Shape3D *>(obj)) {
+      shapes.push_back(shape);
+  }
+  if (auto updatable = dynamic_cast<UpdatableObject *>(obj)) {
+    updatables.push_back(updatable);
+  }
+}
+
+template <typename T> void removeFromVector(std::vector<T> &vec, T obj) {
+  vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
+}
+
+GameObject *Engine::getFirstOfType(const std::type_info &type) const {
+  for (GameObject *obj : objects) {
+    if (typeid(*obj) == type) {
+      return obj;
+    }
+  }
+  return nullptr; // Not found
+}
+void Engine::removeObject(GameObject *obj) {
+  removeFromVector(objects, obj);
+  std::cout << "Removing." << std::endl;
+  if (auto updatable = dynamic_cast<UpdatableObject *>(obj)) {
+    removeFromVector(updatables, updatable);
+  }
+  if (auto shape = dynamic_cast<Shape3D *>(obj)) {
+    removeFromVector(shapes, shape);
+  }
+  delete obj;
+}
+

@@ -1,10 +1,10 @@
 #pragma once
 
-#include "Shape3D.hpp"
+#include "TexturedModelShape3D.hpp"
+#include <GL/gl.h>
 #include <string>
-#include <vector>
 
 namespace modelloader {
-  //Shape3D *shapeFromOBJ(const std::string &filename);
-  Shape3D *shapeFromOBJGenerated(const std::string &filename);
+  ModelShape3D *shapeFromOBJ(const std::string &filename);
+  TexturedModelShape3D *texturedShapeFromOBJ(const std::string &filename, GLuint textureId);
 }

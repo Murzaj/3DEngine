@@ -1,9 +1,9 @@
 #pragma once
-#include "Shape3D.hpp"
+#include "TexturedModelShape3D.hpp"
 
-class Cube3D : public Shape3D {
+class Cube3D : public TexturedModelShape3D {
 public:
-  Cube3D() : Shape3D(
+  Cube3D(GLuint textureId) : TexturedModelShape3D(
   {
     // Positions     
     -1.0f, -1.0f, -1.0f,
@@ -58,6 +58,7 @@ public:
      1.0,  1.0,  1.0,
      1.0,  1.0,  1.0
   },
+  glm::vec3(0.0),
   {
     //normals
     0.0f,  0.0f, -1.0f,
@@ -128,7 +129,8 @@ public:
     1.0, 1.0,
     1.0, 0.0,
     0.0, 0.0
-    }
+    },
+    textureId
   ) 
   {}
   
