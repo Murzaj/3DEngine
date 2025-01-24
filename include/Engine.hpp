@@ -1,7 +1,5 @@
 #pragma once
 
-#include "Shape3D.hpp"
-#include "Observer.hpp"
 
 #include <GL/glew.h>
 #include <glm/ext/matrix_clip_space.hpp>
@@ -9,6 +7,10 @@
 #include <string>
 #include <glm/glm.hpp>
 #include <glm/gtc/matrix_transform.hpp>
+
+#include "BitmapHandler.hpp"
+#include "Shape3D.hpp"
+#include "Observer.hpp"
 
 
 class Engine {
@@ -36,8 +38,10 @@ protected:
   bool fullscreen;
 
 
+  BitmapHandler *bitmapHandler;
 
-  GLuint testRockTexture;
+
+  GLfloat lightPos[4];
 
   glm::mat4 projection;
 

@@ -30,14 +30,21 @@ Engine::Engine() {
   height = 600;
   fixedUpdateMs = 20;
   fullscreen = false;
+
+  bitmapHandler = new BitmapHandler();
+
   displayMode = GLUT_RGB | GLUT_DOUBLE | GLUT_DEPTH;
-  gem = modelloader::shapeFromOBJ("gem.obj");
-  orb = modelloader::shapeFromOBJ("orb.obj");
-  donut = modelloader::shapeFromOBJ("Donut.obj");
+  gem = modelloader::shapeFromOBJGenerated("gem.obj");
+  orb = modelloader::shapeFromOBJGenerated("orb.obj");
+  donut = modelloader::shapeFromOBJGenerated("Donut.obj");
   observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
-  cube = new CubeSmooth3D();
+  cube = new Cube3D();
   cube->translate(glm::vec3(-3,0,0));
   cube->scale(glm::vec3(0.8));
+
+
+
+
 }
 
 Engine::~Engine() { 
@@ -46,11 +53,14 @@ Engine::~Engine() {
   delete donut;
   delete observer;
   delete cube;
+  delete bitmapHandler;
   instance = nullptr;
 }
 
 void Engine::display() {
   const auto view = observer->getTransform();
+
+  GLuint rockTexture = bitmapHandler->getBitmap("rock");
 
   glShadeModel(GL_SMOOTH);
 
@@ -65,20 +75,35 @@ void Engine::display() {
   glLoadMatrixf(glm::value_ptr(view));
 
 
+  // LIGHT SETTINGS HERE
   GLfloat amb[] = {0.2, 0.2, 0.2, 1.0}; // RGBA
   glLightModelfv(GL_LIGHT_MODEL_AMBIENT, amb);
-
   GLfloat diff[] = {0.9, 0.9, 0.9, 1.0}; // RGBA
   glLightfv(GL_LIGHT0, GL_DIFFUSE, diff);
   GLfloat spec[] = {1.0, 1.0, 1.0, 1.0}; // RGBA
-  //
   glLightfv(GL_LIGHT0, GL_SPECULAR, spec);
 
-  GLfloat pos[] = {4.0, 2.0, 0.0, 1.0};
-  glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
-  //glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
-  //glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
+  lightPos[0] = 0.0;
+  lightPos[1] = 3.0;
+  lightPos[2] = 0.0;
+  lightPos[3] = 1.0;
+  glLightfv(GL_LIGHT0, GL_POSITION, lightPos);
+
+
+  // kierunek swiatla
+  GLfloat spotDir[] = {0.0, -1.0, 0.0};
+  glLightfv(GL_LIGHT0, GL_SPOT_DIRECTION, spotDir);
+
+  // połowa kąta rozwarcia stożka światła
+  glLightf(GL_LIGHT0, GL_SPOT_CUTOFF, 90.0);
+
+  // skupienie światła 0-128
+  glLightf(GL_LIGHT0, GL_SPOT_EXPONENT, 40.0);
+
+
+  glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
+  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 1.0);
 
 
@@ -94,25 +119,14 @@ void Engine::display() {
   glMaterialfv(GL_FRONT, GL_EMISSION, emiss);
 
 
-
-  // Draw a red solid teapot
-  /*
-  glm::mat4 teapotTransform =
-      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
-  teapotTransform = glm::rotate(teapotTransform, glm::radians(-angle),
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-  glColor3f(1.0f, 0.0f, 0.0f);
-  glLoadMatrixf(glm::value_ptr(teapotTransform));
-  glutSolidTeapot(0.5);
-  */
+  // TEST DRAW LIGHT POS
+  //glColor3f(1.0, 1.0, 0.0);
+  //glm::mat4 lightT = glm::translate(view, glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
+  //glLoadMatrixf(glm::value_ptr(lightT));
+  //glutSolidSphere(1.0, 12, 12);
 
 
-  /*
-  glm::mat4 gemT =
-      glm::translate(view, glm::vec3(-1.0f, 1.0f, 0.0f));
-  gemT = glm::rotate(gemT, glm::radians(-angle),
-                                glm::vec3(0.0f, 1.0f, 0.0f));
-                              */
+
   glColor3f(0.8, 1.0, 1.0);
   glm::mat4 cubeMVP = view * cube->getTransform();
   glLoadMatrixf(glm::value_ptr(cubeMVP));
@@ -120,17 +134,18 @@ void Engine::display() {
 
 
   glColor3f(1.0, 0.0, 0.0);
-  orb->setTransform(view);
-  orb->translate(glm::vec3(sphereX, sphereY, 0.0f));
-  glLoadMatrixf(glm::value_ptr(orb->getTransform()));
-  orb->draw();
+  donut->setTransform(view);
+  donut->translate(glm::vec3(sphereX, sphereY, 0.0f));
+  glLoadMatrixf(glm::value_ptr(donut->getTransform()));
+  donut->draw();
 
 
-
+/*
   glm::mat4 ballT(view);
   ballT = glm::translate(ballT, glm::vec3(sphereX, sphereY, 0.0f));
   glLoadMatrixf(glm::value_ptr(ballT));
   glutSolidSphere(1.1f, 24, 12);
+  */
 
 
 
@@ -142,8 +157,7 @@ void Engine::display() {
   donutT = glm::rotate(donutT, glm::radians(-angle),
                               glm::vec3(0.0f, 1.0f, 1.0f));
   glLoadMatrixf(glm::value_ptr(donutT));
-
-  glBindTexture(GL_TEXTURE_2D, testRockTexture);
+  glBindTexture(GL_TEXTURE_2D, rockTexture);
   cube->draw();
   glBindTexture(GL_TEXTURE_2D, 0);
 
@@ -284,17 +298,10 @@ void Engine::initialize(int *argc, char *argv[]) {
   glEnable(GL_TEXTURE_2D);
   glClearColor(0.0f, 0.0f, 0.1f, 1.0f);
 
+
+
   // take care of textures
-  glGenTextures(1, &testRockTexture);
-  glBindTexture(GL_TEXTURE_2D, testRockTexture);
-  int width, height, nchan;
-  unsigned char* dt;
-  dt = stbi_load("texture.jpg", &width, &height, &nchan, 0);
-  if (!dt) exit(0);
-  glTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, width, height, 0, GL_RGB, GL_UNSIGNED_BYTE, dt);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-  glTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-  stbi_image_free(dt);
+  bitmapHandler->loadBitmap("rock", "rock.jpg", GL_LINEAR, GL_LINEAR);
 
 
 
@@ -304,7 +311,6 @@ void Engine::initialize(int *argc, char *argv[]) {
   nearPlane = 0.1f;
   farPlane = 100.0f;
   projection = glm::perspective(fov, width / (float)height, nearPlane, farPlane);
-
 
   // temporary
   instance->setupTimer();

@@ -1,13 +1,10 @@
 #include "ModelLoader.hpp"
 #include "Shape3D.hpp"
+#include "ext/objloader.hpp"
+#include "ext/vboindexer.hpp"
 
-#include <fstream>
 #include <glm/glm.hpp>
-#include <iostream>
-#include <sstream>
 #include <string>
-#include <array>
-#include <unordered_map>
 
 struct FaceData {
   unsigned short vertIdx;
@@ -15,6 +12,7 @@ struct FaceData {
   unsigned short normIdx;
 };
 
+/*
 Shape3D *modelloader::shapeFromOBJ(const std::string &filename) {
   std::fstream file;
 
@@ -87,3 +85,48 @@ Shape3D *modelloader::shapeFromOBJ(const std::string &filename) {
   Shape3D *shape = new Shape3D(outVertices, outColors, outNormals, outFaces, outTexCoord);
   return shape;
 }
+*/
+
+
+Shape3D *modelloader::shapeFromOBJGenerated(const std::string &filename) {
+  std::vector<glm::vec3> orig_vertices;
+  std::vector<glm::vec2> orig_uvs;
+  std::vector<glm::vec3> orig_normals;
+
+  loadOBJ(filename.c_str(), orig_vertices, orig_uvs, orig_normals);
+
+  std::vector<glm::vec3> out_vertices;
+  std::vector<glm::vec2> out_uvs;
+  std::vector<glm::vec3> out_normals;
+  std::vector<unsigned short> out_indices;
+  indexVBO(orig_vertices, orig_uvs, orig_normals, out_indices, out_vertices, out_uvs, out_normals);
+
+  std::vector<float> final_vertices; 
+  std::vector<float> final_normals; 
+  std::vector<unsigned int> final_indices; 
+  std::vector<float> final_uvs; 
+
+  for (glm::vec3 v : out_vertices) {
+    final_vertices.push_back(v.x);
+    final_vertices.push_back(v.y);
+    final_vertices.push_back(v.z);
+  }
+  for (glm::vec3 n : out_normals) {
+    final_normals.push_back(n.x);
+    final_normals.push_back(n.y);
+    final_normals.push_back(n.z);
+  }
+
+  for (glm::vec2 u : out_uvs) {
+    final_uvs.push_back(u.x);
+    final_uvs.push_back(u.y);
+  }
+
+  for (unsigned short i : out_indices) {
+    final_indices.push_back(i);
+  }
+
+  return new Shape3D(final_vertices, {}, final_normals, final_indices, final_uvs);
+}
+
+

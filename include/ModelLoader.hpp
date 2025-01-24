@@ -5,5 +5,6 @@
 #include <vector>
 
 namespace modelloader {
-  Shape3D *shapeFromOBJ(const std::string &filename);
+  //Shape3D *shapeFromOBJ(const std::string &filename);
+  Shape3D *shapeFromOBJGenerated(const std::string &filename);
 }
