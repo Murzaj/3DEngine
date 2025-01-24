@@ -35,7 +35,7 @@ Engine::Engine() {
   orb = modelloader::shapeFromOBJ("orb.obj");
   donut = modelloader::shapeFromOBJ("Donut.obj");
   observer = new Observer(glm::vec3(0,1,4), glm::vec3(0), glm::vec3(0,1,0));
-  cube = new Cube3D();
+  cube = new CubeSmooth3D();
   cube->translate(glm::vec3(-3,0,0));
   cube->scale(glm::vec3(0.8));
 }
@@ -78,7 +78,7 @@ void Engine::display() {
   glLightfv(GL_LIGHT0, GL_POSITION, pos);
 
   //glLightf(GL_LIGHT0, GL_CONSTANT_ATTENUATION, 1.0);
-  glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
+  //glLightf(GL_LIGHT0, GL_LINEAR_ATTENUATION, 1.0);
   glLightf(GL_LIGHT0, GL_QUADRATIC_ATTENUATION, 1.0);
 
 
