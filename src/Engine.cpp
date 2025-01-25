@@ -1,9 +1,4 @@
 #include "Engine.hpp"
-#include "Cube3D.hpp"
-#include "CubeSmooth3D.hpp"
-#include "ModelLoader.hpp"
-#include "SphereShape3D.hpp"
-#include "TexturedPlane3D.hpp"
 #include "UpdatableObject.hpp"
 
 #include <GL/freeglut.h>
