@@ -1,9 +1,9 @@
 #pragma once
 #include "TexturedModelShape3D.hpp"
 
-class Cube3D : public TexturedModelShape3D {
+class CubeModel3D : public TexturedModelShape3D {
 public:
-  Cube3D(GLuint textureId) : TexturedModelShape3D(
+  CubeModel3D(GLuint textureId) : TexturedModelShape3D(
   {
     // Positions     
     -1.0f, -1.0f, -1.0f,
