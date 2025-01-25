@@ -31,6 +31,6 @@ protected:
   std::unordered_map<unsigned char, bool> pressedKeys;
   std::unordered_map<unsigned char, bool> prevFrameKeys;
   MouseButtons buttons;
-  glm::vec2 mouseMotion;
+  glm::vec2 mouseMotion = glm::vec2(0.0f, 0.0f);
   int wheelDirection;
 };

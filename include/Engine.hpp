@@ -11,7 +11,7 @@
 
 #include "BitmapHandler.hpp"
 #include "GameObject.hpp"
-#include "ObjectManager.hpp"
+#include "EngineManager.hpp"
 #include "Shape3D.hpp"
 #include "Observer.hpp"
 #include "InputMap.hpp"
@@ -19,25 +19,20 @@
 
 
 class UpdatableObject;
-class Engine : public Initializer, public ObjectManager {
+class Engine : public Initializer, public EngineManager {
 
 protected:
   static Engine *instance;
   std::string name;
 
   // Initialize the camera and projection matrix
-  Observer *observer;
+  Observer *observer = nullptr;
 
   std::vector<GameObject *> objects;
   std::vector<UpdatableObject *> updatables;
   std::vector<Shape3D *> shapes;
+  std::vector<GameObject *> cleanupTable;
 
-  Shape3D *cube;
-  Shape3D *gem;
-  Shape3D *orb;
-  Shape3D *boulder;
-  Shape3D *ground;
-  Shape3D *sphereBasicTest;
   InputMap *inputMap;
 
   float farPlane;
@@ -59,10 +54,7 @@ protected:
 
   glm::mat4 projection;
 
-  GLuint vertexbuffer = 0;
-  GLuint simpleShaderID = 0;
   float angle = 0.0f;
-
 
   bool warped = false;
 
@@ -88,14 +80,7 @@ protected:
   void onReshape(int width, int height);
   void onMotion(int x, int y);
   void onMouseWheel(int wheel, int direction, int x, int y);
-
-
   void drawBox();
-
-  float sphereX = 1.0f;
-  float sphereY = 1.0f;
-
-
 
 public:
   Engine();
@@ -107,12 +92,13 @@ public:
   void setVideoMode(int width, int height, bool fullscreen, bool zBuffer);
   void setFixedUpdateFps(float fps);
 
-  ObjectManager *getObjectManager() override;
+  EngineManager *getEngineManager() override;
   void addObject(GameObject *obj) override;
   void removeObject(GameObject *obj) override;
   GameObject *getFirstOfType(const std::type_info &type) const override;
   BitmapHandler *getBitmapHandler() override;
 
+  void stop() override;
   void setupLight(
                           const glm::vec3 &ambient,
                           const glm::vec3 &diffuse,
@@ -126,6 +112,5 @@ public:
                           float quadraticAttentuation);
 
 
-
-
+  void setupView(float farPlane, float nearPlane, float fov, glm::vec3 cameraPos, glm::vec3 cameraLookAt, glm::vec3 cameraUp);
 };

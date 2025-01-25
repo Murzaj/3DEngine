@@ -44,6 +44,21 @@ Engine::~Engine() {
 }
 
 
+void Engine::setupView(float farPlane, float nearPlane, float fov, glm::vec3 cameraPos, glm::vec3 cameraLookAt, glm::vec3 cameraUp) {
+  Observer *oldObserver = nullptr;
+  if(observer != nullptr) {
+    oldObserver = observer;
+  }
+  observer = new Observer(cameraPos, cameraLookAt, cameraUp);
+  fov = fov;
+  farPlane = farPlane;
+  nearPlane = nearPlane;
+  onReshape(width, height);
+  if(oldObserver != nullptr) {
+    delete oldObserver;
+  }
+}
+
 void Engine::setupLight(
                         const glm::vec3 &ambient,
                         const glm::vec3 &diffuse,
@@ -82,7 +97,7 @@ void Engine::display() {
   const auto view = observer->getTransform();
   glShadeModel(GL_SMOOTH);
   glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-  glLoadIdentity(); // Reset transformations
+  glLoadIdentity();
   // Set up the projection matrix
   glMatrixMode(GL_PROJECTION);
   glLoadMatrixf(glm::value_ptr(projection));
@@ -91,35 +106,20 @@ void Engine::display() {
   glLoadMatrixf(glm::value_ptr(view));
 
   glColorMaterial(GL_FRONT_AND_BACK, GL_AMBIENT_AND_DIFFUSE);
-
-  GLfloat specul[] = {1.0, 1.0, 1.0, 1.0};
-  glMaterialfv(GL_FRONT, GL_SPECULAR, specul);
   GLfloat emiss[] = {0.0, 0.0, 0.0, 1.0};
   glMaterialfv(GL_FRONT, GL_EMISSION, emiss);
-
-
-  //TEST
-  glColor3f(1.0, 1.0, 0.0);
-  glm::mat4 lightT = glm::translate(view, glm::vec3(lightPos[0], lightPos[1], lightPos[2]));
-  glLoadMatrixf(glm::value_ptr(lightT));
-  glutSolidSphere(1.0, 12, 12);
-
-
+  GLfloat specul[] = {0.5, 0.5, 0.5, 1.0};
+  glMaterialfv(GL_FRONT, GL_SPECULAR, specul);
 
   for (auto shape : shapes) {
     shape->draw(view);
   }
 
-
-  ground->draw(view);
-
-
-  sphereBasicTest->draw(view);
-
-
-  cube->draw(view);
-
   glutSwapBuffers();
+}
+
+template <typename T> void removeFromVector(std::vector<T> &vec, T obj) {
+  vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
 }
 
 void Engine::fixedUpdate() {
@@ -127,33 +127,12 @@ void Engine::fixedUpdate() {
   if (angle >= 360.0f) {
     angle -= 360.0f;
   }
-  cube->rotate(glm::radians(1.0f), glm::vec3(0,1,0));
-
-  auto motion = inputMap->getMouseMotion();
-
-  if (std::abs(motion.x) >= 0) {
-    sphereBasicTest->translate(glm::vec3(motion.x/20.0f, 0.0, motion.y/20.0f));
-    //observer->rotate(motion.x / 100.f, glm::vec3(0.0, 1.0, 0.0));
-  }
 
   if(inputMap->isKeyDown(27)) {
-    std::exit(0);
+    stop();
   }
   if(inputMap->isKeyJustPressed('l')) {
     toggleLighting();
-  }
-
-  if (inputMap->isKeyDown('a')) {
-    sphereX -= .2f;
-  }
-  if (inputMap->isKeyDown('d')) {
-    sphereX += .2f;
-  }
-  if (inputMap->isKeyDown('w')) {
-    sphereY += .2f;
-  }
-  if (inputMap->isKeyDown('s')) {
-    sphereY -= .2f;
   }
 
   for(auto updatable : updatables) {
@@ -249,32 +228,18 @@ void Engine::onMotion(int x, int y) {
 void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
   const float DEG_IN_RAD = 0.01745329;
   fov -= direction * DEG_IN_RAD;
-  projection =
-      glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
+  projection = glm::perspective(fov, (float)width / (float)height, nearPlane, farPlane);
 }
 
 void Engine::prepareObjects() {
-  gem = modelloader::shapeFromOBJ("gem.obj");
-  orb = modelloader::shapeFromOBJ("orb.obj");
-  observer = new Observer(glm::vec3(0,4,8), glm::vec3(0,0,0), glm::vec3(0,1.0,0));
-  cube = new Cube3D(bitmapHandler->getBitmap("rock"));
-  cube->translate(glm::vec3(-3,0,0));
-  cube->scale(glm::vec3(0.8));
-  sphereBasicTest = new SphereShape3D(glm::vec3(1.0), 1.0, 16, 32);
   inputMap = new InputMap;
-
-  ground = new TexturedPlane3D(glm::vec3(1.0), bitmapHandler->getBitmap("boulder"));
-  ground->translate(glm::vec3(0, -4, 0));
-  ground->scale(glm::vec3(10.0));
 }
 
 void Engine::cleanupObjects() {
-  delete gem;
-  delete orb;
-  delete ground;
+  for (auto x : objects) {
+    removeObject(x);
+  }
   delete observer;
-  delete cube;
-  delete sphereBasicTest;
   delete inputMap;
 }
 
@@ -345,13 +310,16 @@ bool Engine::initialize(int *argc, char *argv[]) {
 
 
 void Engine::run() {
+  if(observer == nullptr) {
+    std::cerr << "Please call setupView() at least once!" << std::endl;
+  }
   prepareObjects();
   prepareCallbacks();
   mainLoop();
 }
 
 
-ObjectManager *Engine::getObjectManager() { return this; }
+EngineManager *Engine::getEngineManager() { return this; }
 BitmapHandler *Engine::getBitmapHandler() { return bitmapHandler; }
 
 
@@ -370,9 +338,6 @@ void Engine::addObject(GameObject *obj) {
   }
 }
 
-template <typename T> void removeFromVector(std::vector<T> &vec, T obj) {
-  vec.erase(std::remove(vec.begin(), vec.end(), obj), vec.end());
-}
 
 GameObject *Engine::getFirstOfType(const std::type_info &type) const {
   for (GameObject *obj : objects) {
@@ -383,14 +348,23 @@ GameObject *Engine::getFirstOfType(const std::type_info &type) const {
   return nullptr; // Not found
 }
 void Engine::removeObject(GameObject *obj) {
-  removeFromVector(objects, obj);
   std::cout << "Removing." << std::endl;
-  if (auto updatable = dynamic_cast<UpdatableObject *>(obj)) {
-    removeFromVector(updatables, updatable);
-  }
   if (auto shape = dynamic_cast<Shape3D *>(obj)) {
+    std::cout << "Removing Shape." << std::endl;
     removeFromVector(shapes, shape);
   }
-  delete obj;
+  if (auto updatable = dynamic_cast<UpdatableObject *>(obj)) {
+    std::cout << "Removing Updatable." << std::endl;
+    removeFromVector(updatables, updatable);
+  }
+  removeFromVector(objects, obj);
+  cleanupTable.push_back(obj);
+  //delete obj;
+}
+
+
+void Engine::stop() {
+  cleanupObjects();
+  std::exit(0);
 }
 

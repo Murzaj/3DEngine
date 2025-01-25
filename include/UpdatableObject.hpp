@@ -2,9 +2,9 @@
 
 #include "Engine.hpp"
 #include "GameObject.hpp"
-#include "ObjectManager.hpp"
+#include "EngineManager.hpp"
 
 class UpdatableObject : public virtual GameObject {
 public:
-  virtual void update(float delta, const InputMap &input, ObjectManager* manager) = 0;
+  virtual void update(float delta, const InputMap &input, EngineManager* manager) = 0;
 };
