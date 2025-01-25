@@ -158,6 +158,10 @@ void Engine::setupTimer() {
 void Engine::onSpecial(int key, int x, int y) {}
 void Engine::onSpecialUp(int key, int x, int y) {}
 
+bool Engine::isLightingEnabled() const {
+  return lightingEnabled;
+}
+
 void Engine::toggleLighting() {
   if (lightingEnabled) {
     glDisable(GL_LIGHTING);
@@ -167,7 +171,6 @@ void Engine::toggleLighting() {
     glEnable(GL_LIGHTING);
     lightingEnabled = true;
   }
-
 }
 
 

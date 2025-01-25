@@ -67,7 +67,6 @@ protected:
 
 
   bool lightingEnabled = true;
-  void toggleLighting();
 
 
   void setupTimer();
@@ -114,4 +113,6 @@ public:
 
 
   void setupView(float farPlane, float nearPlane, float fov, glm::vec3 cameraPos, glm::vec3 cameraLookAt, glm::vec3 cameraUp);
+  void toggleLighting();
+  bool isLightingEnabled() const;
 };
