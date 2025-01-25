@@ -50,7 +50,7 @@ int main(int argc, char **argv)
     0.0f, boulderModel, rd));
   }
 
-  engine.setupView(8.0f, 0.0f,glm::radians(80.0f), glm::vec3(0, 2, 4), glm::vec3(0,0,0), glm::vec3(0, 1, 0));
+  engine.setupView(8.0f, 0.0f,glm::radians(80.0f), glm::vec3(0, 2, 8), glm::vec3(0,0,0), glm::vec3(0, 1, 0));
 
   engine.setupLight(
     //amb, diff, spec

@@ -80,6 +80,7 @@ protected:
   void onReshape(int width, int height);
   void onMotion(int x, int y);
   void onMouseWheel(int wheel, int direction, int x, int y);
+  void onMouseFunc(int button, int state, int x, int y);
   void drawBox();
 
 public:

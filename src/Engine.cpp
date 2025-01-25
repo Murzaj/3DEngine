@@ -225,6 +225,36 @@ void Engine::onMotion(int x, int y) {
   inputMap->setMouseMotion(dx,dy);
 }
 
+
+void Engine::onMouseFunc(int button, int state, int x, int y) {
+  switch (button) {
+    case GLUT_LEFT_BUTTON:
+      if(state == GLUT_UP) {
+        inputMap->setLeftClickUp();
+      }
+      if (state == GLUT_DOWN) {
+        inputMap->setLeftClickDown();
+      }
+    break;
+    case GLUT_RIGHT_BUTTON:
+      if(state == GLUT_UP) {
+        inputMap->setRightClickUp();
+      }
+      if (state == GLUT_DOWN) {
+        inputMap->setRightClickDown();
+      }
+    break;
+  }
+      
+
+
+}
+
+
+
+
+
+
 void Engine::onMouseWheel(int wheel, int direction, int x, int y) {
   const float DEG_IN_RAD = 0.01745329;
   fov -= direction * DEG_IN_RAD;
@@ -266,6 +296,7 @@ void Engine::prepareCallbacks() {
     instance->onMouseWheel(wheel, direction, x, y);
   });
 
+  glutMouseFunc([](int button, int state, int x, int y){ instance->onMouseFunc(button, state, x, y); });
 }
 
 

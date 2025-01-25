@@ -28,6 +28,11 @@ glm::vec2 InputMap::getMouseMotion() const {
   return mouseMotion;
 }
 
+MouseButtons InputMap::getMouseButtons() const {
+  return buttons;
+}
+
+
 // setters - for engine to handle
 void InputMap::setKeyDown(unsigned char key) {
   pressedKeys[key] = true;

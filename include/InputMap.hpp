@@ -5,7 +5,6 @@
 struct MouseButtons {
   bool left;
   bool right;
-  bool middle;
 };
 
 
@@ -14,6 +13,7 @@ public:
   bool isKeyDown(unsigned char key) const;
   bool isKeyJustPressed(unsigned char key) const;
   glm::vec2 getMouseMotion() const;
+  MouseButtons getMouseButtons() const;
   int getWheelDirection() const;
 
  // setters - for engine to handle 
