@@ -1,0 +1,5 @@
+D:/Pulpit/3D_PLATFORMA/build/CMakeFiles/3DEngine.dir
+D:/Pulpit/3D_PLATFORMA/build/CMakeFiles/copy_assets.dir
+D:/Pulpit/3D_PLATFORMA/build/CMakeFiles/copy_project_assets.dir
+D:/Pulpit/3D_PLATFORMA/build/CMakeFiles/ALL_BUILD.dir
+D:/Pulpit/3D_PLATFORMA/build/CMakeFiles/ZERO_CHECK.dir

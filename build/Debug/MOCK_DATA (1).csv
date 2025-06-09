@@ -1,0 +1,51 @@
+ID_KIERUNKU,NAZWA,ID_WYDZIALU,ID_SEMESTRU
+1,Informatyka,3,2
+2,Zarządzanie,12,20
+3,Ekonomia,4,15
+4,Prawo,13,9
+5,Psychologia,9,14
+6,Filologia angielska,15,13
+7,Budownictwo,8,2
+8,Architektura,11,20
+9,Kierunek lekarski,10,1
+10,Pedagogika,11,6
+11,Finanse i rachunkowość,14,9
+12,Automatyka i robotyka,8,9
+13,Dziennikarstwo i komunikacja społeczna,2,13
+14,Socjologia,6,10
+15,Politologia,1,8
+16,Historia,3,19
+17,Matematyka,9,2
+18,Fizyka,11,9
+19,Chemia,3,6
+20,Biologia,8,2
+21,Biotechnologia,6,3
+22,Inżynieria środowiska,10,8
+23,Turystyka i rekreacja,3,7
+24,Logistyka,2,13
+25,Grafika,14,16
+26,Stosunki międzynarodowe,14,14
+27,Filologia polska,2,18
+28,Filozofia,3,10
+29,Kulturoznawstwo,11,10
+30,Pielęgniarstwo,3,19
+31,Fizjoterapia,6,1
+32,Farmacja,12,14
+33,Dietetyka,2,15
+34,Geodezja i kartografia,13,10
+35,Elektrotechnika,3,3
+36,Mechanika i budowa maszyn,8,2
+37,Inżynieria materiałowa,10,10
+38,Rolnictwo,5,6
+39,Leśnictwo,7,20
+40,Weterynaria,1,6
+41,Kognitywistyka,6,12
+42,Bezpieczeństwo narodowe,14,16
+43,Lingwistyka stosowana,14,4
+44,Zarządzanie i inżynieria produkcji,15,14
+45,Europeistyka,6,18
+46,Astronomia,10,5
+47,Ochrona środowiska,3,15
+48,Wzornictwo,15,15
+49,Administracja,7,18
+50,Gospodarka przestrzenna,7,1
