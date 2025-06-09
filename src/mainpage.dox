@@ -1,0 +1,24 @@
+/**
+ * @mainpage Kulen Machen Dokumentacja
+ *
+ * @section intro Wprowadzenie
+ * Kulen Machen to trójwymiarowa gra stworzona na w³asnym silniku 3D, 
+ * wykorzystuj¹cym bibliotekê GLUT do obs³ugi renderowania i wejœcia.
+ * 
+ * Gracz porusza siê po œwiecie pe³nym przeszkód i musi unikaæ kolców, 
+ * które koñcz¹ rozgrywkê przy kontakcie. Celem jest przetrwanie jak najd³u¿ej, 
+ * zachowuj¹c refleks i precyzjê ruchów.
+ *
+ * @section techstack Technologia
+ * - Silnik 3D napisany od podstaw w C++
+ * - Rendering i obs³uga wejœcia: GLUT
+ * - W³asne zarz¹dzanie obiektami, kolizjami i logik¹ gry
+ *
+ * @section zawartosc Zawartoœæ
+ * - Przestrzenie nazw
+ * - Klasy
+ * - Pliki
+ *
+ * @section autor Autor
+ * Projekt autorstwa Jakuba Jakubczyka i Grzegorza Huka.
+ */

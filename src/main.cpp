@@ -1,72 +1,135 @@
 #include <GL/glew.h>
 #include <glm/glm.hpp>
-#include <GL/glut.h>
+#include <iostream>
+
 #include "Engine.hpp"
-#include "ModelLoader.hpp"
+#include "SoundHandler.hpp"
 #include "SphereShape3D.hpp"
-#include "TexturedPlane3D.hpp"
-#include "game/FallingBoulder.hpp"
-#include "game/Player.hpp"
-#include <cstdlib>
-#include <ctime>
+#include "game/GameScene.hpp"
+#include "game/MenuScene.hpp"
+#include "BitmapHandler.hpp"
+#include <filesystem>
 
-int main(int argc, char **argv) 
-{   
-  std::srand(std::time(NULL));
-  Engine engine;
+int main(int argc, char** argv)
+{
+    std::cout << "Uruchamianie aplikacji..." << std::endl;
 
-  engine.setVideoMode(800, 600, false, true);
-  engine.setFixedUpdateFps(60);
+    Engine engine;
+    engine.setWindowName("Kulen Machen");
+    engine.setVideoMode(1024, 768, false, true);
+    engine.setFixedUpdateFps(60.0f);
+    engine.setClearColor(glm::vec4(0.1f, 0.05f, 0.15f, 1.0f));
 
-  if(!engine.initialize(&argc, argv)) std::exit(1);
+    if (!engine.initialize(&argc, argv)) {
+        std::cerr << "Nie udalo sie zainicjalizowac silnika." << std::endl;
+        return 1;
+    }
 
-  engine.setClearColor(glm::vec4(0.0f,0.0f,0.0f, 1.0f));
-  auto handler = engine.getBitmapHandler();
+    BitmapHandler* bmpHandler = engine.getBitmapHandler();
+    if (!bmpHandler) {
+        std::cerr << "Nie udalo sie uzyskac BitmapHandler z silnika." << std::endl;
+        return 1;
+    }
+    try {
+        std::cout << "Biezacy katalog roboczy:  " << std::filesystem::current_path() << std::endl;
+    }
+    catch (const std::filesystem::filesystem_error& e) {
+        std::cerr << "Blad pobierania biezacej sciezki: " << e.what() << std::endl;
+    }
+   
+    SoundHandler* soundHandler = engine.getSoundHandler(); 
+    if (!soundHandler) { 
+        std::cerr << "Nie udalo sie uzyskac SoundHandler z silnika." << std::endl; 
+        return 1; 
+    }
+    if (!soundHandler->loadSound("background_music", "background_music.wav", true)) {
+        std::cerr << "Nie udalo sie zaladowac muzyki tla: background_music.wav" << std::endl;
+    }
+    if (!soundHandler->loadSound("collision_sound", "collision_sound.wav", false)) { 
+        std::cerr << "Nie udalo sie zaladowac dzwieku kolizji: collision_sound.wav" << std::endl;
+    }
 
-  auto rockTexture = handler->loadBitmap("rock", "rock.jpg", GL_LINEAR, GL_LINEAR);
-  auto boulderTexture = handler->loadBitmap("boulder", "boulder.jpg", GL_LINEAR, GL_LINEAR);
-  auto boulderModel = modelloader::texturedShapeFromOBJ("boulder.obj", handler->getBitmap("boulder"));
-  auto groundModel = new TexturedPlane3D(glm::vec3(1.0f), handler->getBitmap("rock"));
-  groundModel->translate(glm::vec3(.0f, -2.0f, .0f));
-  groundModel->scale(glm::vec3(8.0f));
+    GLuint spikeTex = bmpHandler->loadBitmap("spikeTex", "spike.jpg");
+    if (spikeTex == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury kolca: spike.jpg" << std::endl;
+    }
+    else {
+        std::cout << "Zaladowano teksture kolca ID: " << spikeTex << std::endl;
+    }
+
+    GLuint menuBackgroundTex = bmpHandler->loadBitmap("menuBackground", "menu_background.jpg");
+    if (menuBackgroundTex == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla menu: menu_background.jpg" << std::endl;
+    }
+    else {
+        std::cout << "Zaladowano teksture tla menu ID: " << menuBackgroundTex << std::endl;
+    }
+
+    GLuint nieboBgTexID = bmpHandler->loadBitmap("nieboBackground", "t³o.jpg"); 
+    if (nieboBgTexID == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla dla Nieba (t³o.jpg)." << std::endl;
+    }
+    else {
+        std::cout << "Zaladowano teksture tla Niebo ID: " << nieboBgTexID << std::endl;
+        engine.setMapBackgroundTexture(GameMap::NIEBO, nieboBgTexID);
+    }
+
+    GLuint dzunglaBgTexID = bmpHandler->loadBitmap("dzunglaBackground", "d¿ungla.jpg");
+    if (dzunglaBgTexID == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla dla Dzungli: d¿ungla.jpg" << std::endl;
+    }
+    else {
+        engine.setMapBackgroundTexture(GameMap::DZUNGLA, dzunglaBgTexID);
+    }
+
+    GLuint lodowaBgTexID = bmpHandler->loadBitmap("lodowaBackground", "lodowa.jpg");
+    if (lodowaBgTexID == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla dla Lodowej: lodowa.jpg" << std::endl;
+    }
+    else {
+        engine.setMapBackgroundTexture(GameMap::LODOWA, lodowaBgTexID);
+    }
+
+    GLuint wulkanBgTexID = bmpHandler->loadBitmap("wulkanBackground", "wulkan.jpg");
+    if (wulkanBgTexID == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla dla Wulkanu: wulkan.jpg" << std::endl;
+    }
+    else {
+        engine.setMapBackgroundTexture(GameMap::WULKAN, wulkanBgTexID);
+    }
+
+    GLuint pustyniaBgTexID = bmpHandler->loadBitmap("pustyniaBackground", "pustynia.jpg");
+    if (pustyniaBgTexID == 0) {
+        std::cerr << "Nie udalo sie zaladowac tekstury tla dla Pustyni: pustynia.jpg" << std::endl;
+    }
+    else {
+        engine.setMapBackgroundTexture(GameMap::PUSTYNIA, pustyniaBgTexID);
+    }
+
+    MenuScene* menuScene = new MenuScene(&engine);
+    engine.addObject(menuScene);
+    engine.setMenuScene(menuScene); 
 
 
+    engine.setupView(
+        500.0f,
+        0.1f,
+        75.0f,
+        glm::vec3(0, 5, 10),
+        glm::vec3(0, 0, 0)
+    );
 
-  //auto playerModel = modelloader::texturedShapeFromOBJ("player.obj", handler->getBitmap("player"));
-  auto playerModel = new SphereShape3D(glm::vec3(1.0f), 1.0f, 8, 16);
-  std::random_device rd;
-  int boulderCount = 10;
-  engine.addObject(new Player(playerModel, 1.0f, glm::vec3(0.0f, 0.0f, 0.0f)));
-  engine.addObject(groundModel);
+    engine.setupLight(
+        glm::vec3(0.3f, 0.3f, 0.35f),
+        glm::vec3(0.9f, 0.9f, 0.85f),
+        glm::vec3(0.8f, 0.8f, 0.8f),
+        glm::vec3(0.0f, 20.0f, 10.0f),
+        true
+    );
 
+    std::cout << "Konfiguracja zakonczona. Uruchamianie silnika..." << std::endl;
+    engine.run();
 
-
-  for (int i = 0; i < boulderCount; i++) {
-    engine.addObject(new FallingBoulder(
-    glm::vec3(0.0, 8.0, 0.0),
-    glm::vec3(4.0, 1.0, 4.0),
-    1.0f, 2.0f,
-    1.0f, 1.5f,
-    0.0f, boulderModel, rd));
-  }
-
-  engine.setupView(8.0f, 0.0f,glm::radians(80.0f), glm::vec3(0, 2, 8), glm::vec3(0,0,0), glm::vec3(0, 1, 0));
-
-  engine.setupLight(
-    //amb, diff, spec
-    glm::vec3(0.2, 0.2, 0.2),
-    glm::vec3(0.9, 0.9, 0.9),
-    glm::vec3(1.0, 1.0, 1.0),
-    // pos
-    glm::vec3(3.0, 2.0, -3.0),
-    // dir
-    glm::vec3(-0.5, -1.0, 0.0),
-    // cutoff,exponent, attentuation
-    180.0,
-    1.0,
-    0.0,1.0,0.2
-  );
-
-  engine.run();
-  return 0;
+    std::cout << "Aplikacja zakonczona." << std::endl;
+    return 0;
 }

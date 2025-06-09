@@ -1,74 +1,78 @@
 #include "InputMap.hpp"
-#include <stdexcept>
+#include <iostream>
+
+
 
 bool InputMap::isKeyDown(unsigned char key) const {
-  try {
-    return pressedKeys.at(key);
-  } catch (std::out_of_range e) {
-    return false;
-  }
-}
-bool InputMap::isKeyJustPressed(unsigned char key) const {
-  try {
-    if(pressedKeys.at(key)) {
-      try {
-        return !prevFrameKeys.at(key);
-      }
-      catch (std::out_of_range e) {
-          return true;
-      }
-    }
-  } catch (std::out_of_range e) {
-    return false;
-  }
-  return false;
+    return currentKeys.count(key);
 }
 
-glm::vec2 InputMap::getMouseMotion() const {
-  return mouseMotion;
+bool InputMap::isKeyJustPressed(unsigned char key) const {
+    return currentKeys.count(key) && !previousKeys.count(key);
+}
+
+bool InputMap::isKeyJustReleased(unsigned char key) const {
+    return !currentKeys.count(key) && previousKeys.count(key);
+}
+
+
+glm::vec2 InputMap::getMouseDelta() const {
+    return mouseDelta;
+}
+
+glm::vec2 InputMap::getMousePosition() const {
+    return currentMousePos;
 }
 
 MouseButtons InputMap::getMouseButtons() const {
-  return buttons;
+    return buttons;
+}
+
+int InputMap::getWheelDirection() const {
+    return wheelDirection;
 }
 
 
-// setters - for engine to handle
+
 void InputMap::setKeyDown(unsigned char key) {
-  pressedKeys[key] = true;
-  
-}
-void InputMap::setKeyUp(unsigned char key){
-  pressedKeys[key] = false;
+    currentKeys.insert(key);
 }
 
-void InputMap::setLeftClickDown(){
-  buttons.left = true;
+void InputMap::setKeyUp(unsigned char key) {
+    currentKeys.erase(key);
 }
 
-void InputMap::setLeftClickUp(){
-  buttons.left = false;
+void InputMap::setLeftClickDown() {
+    buttons.left = true;
+    setKeyDown(MOUSE_LEFT_CLICK_PSEUDO_KEY); 
 }
-
-void InputMap::setRightClickDown(){
-  buttons.right = true;
+void InputMap::setLeftClickUp() {
+    buttons.left = false;
+    setKeyUp(MOUSE_LEFT_CLICK_PSEUDO_KEY); 
 }
+void InputMap::setRightClickDown() { buttons.right = true; }
+void InputMap::setRightClickUp() { buttons.right = false; }
+void InputMap::setMiddleClickDown() { buttons.middle = true; }
+void InputMap::setMiddleClickUp() { buttons.middle = false; }
 
-void InputMap::setRightClickUp(){
-  buttons.right = false;
-}
-
-void InputMap::setMouseMotion(float x, float y){
-  mouseMotion = glm::vec2(x, y);
+void InputMap::setMousePosition(int x, int y) {
+    currentMousePos = glm::vec2(static_cast<float>(x), static_cast<float>(y));
 }
 
 void InputMap::setWheelDirection(int direction) {
-  wheelDirection = direction;
+    wheelDirection = direction;
 }
 
-void InputMap::resetTemporary() {
-  wheelDirection = 0;
-  mouseMotion = glm::vec2(0.0f);
-  prevFrameKeys = pressedKeys;
-}
 
+
+void InputMap::updateFrameState() {
+    previousKeys = currentKeys;
+
+
+
+    mouseDelta = currentMousePos - previousMousePos;
+    previousMousePos = currentMousePos;
+
+
+    wheelDirection = 0;
+}
